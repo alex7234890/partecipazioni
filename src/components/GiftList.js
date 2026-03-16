@@ -11,43 +11,33 @@ const GIFT_CREDENTIALS = {
 
 function CopyField({ label, value }) {
   const [copied, setCopied] = useState(false)
-
   const handleCopy = () => {
     navigator.clipboard.writeText(value)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
-
   return (
-    <div className="flex items-center justify-between gap-3 bg-cream rounded-xl px-4 py-3 border border-gold/20">
-      <div className="text-left">
-        <p className="text-xs text-charcoal/40 uppercase tracking-wide mb-0.5">{label}</p>
-        <p className="font-mono text-charcoal font-semibold tracking-wider">{value}</p>
+    <div style={{
+      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      padding: '12px 0',
+      borderBottom: '1px solid rgba(184,150,62,0.12)',
+    }}>
+      <div>
+        <p className="label-elegant mb-1">{label}</p>
+        <p style={{ fontFamily: 'monospace', fontSize: '0.9rem', color: '#2C2420', letterSpacing: '0.08em' }}>{value}</p>
       </div>
       <button
         onClick={handleCopy}
-        className={`flex-shrink-0 flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg font-medium transition-all ${
-          copied
-            ? 'bg-green-500 text-white'
-            : 'bg-white border border-gold/30 text-gold hover:bg-gold hover:text-white'
-        }`}
+        style={{
+          background: 'transparent',
+          border: `1px solid ${copied ? 'rgba(80,160,80,0.5)' : 'rgba(184,150,62,0.35)'}`,
+          color: copied ? '#4a9a5a' : '#B8963E',
+          fontSize: '0.65rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+          padding: '6px 14px', cursor: 'pointer',
+          transition: 'all 0.2s', flexShrink: 0,
+        }}
       >
-        {copied ? (
-          <>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7"/>
-            </svg>
-            Copiato!
-          </>
-        ) : (
-          <>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
-            </svg>
-            Copia
-          </>
-        )}
+        {copied ? 'Copiato' : 'Copia'}
       </button>
     </div>
   )
@@ -55,17 +45,28 @@ function CopyField({ label, value }) {
 
 export default function GiftList() {
   return (
-    <section className="py-16 px-4">
+    <section className="py-24 px-4">
+      <motion.p
+        className="label-elegant text-center mb-4"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+      >
+        Un pensiero per noi
+      </motion.p>
       <motion.h2
-        className="font-playfair text-3xl sm:text-4xl text-gold text-center mb-2"
-        initial={{ opacity: 0, y: 20 }}
+        className="font-playfair text-charcoal text-center mb-4"
+        style={{ fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 400 }}
+        initial={{ opacity: 0, y: 16 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
+        transition={{ delay: 0.1 }}
       >
         Lista nozze
       </motion.h2>
       <motion.p
-        className="text-rose/60 mb-10 max-w-md mx-auto leading-relaxed text-center"
+        className="font-playfair text-center mb-12"
+        style={{ fontSize: '0.88rem', color: 'rgba(44,36,32,0.45)', fontStyle: 'italic', maxWidth: 360, margin: '0 auto 3rem' }}
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
@@ -75,41 +76,51 @@ export default function GiftList() {
       </motion.p>
 
       <motion.div
-        className="max-w-sm mx-auto"
+        className="max-w-xs mx-auto"
         initial={{ opacity: 0, y: 20 }}
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ delay: 0.3 }}
       >
-        {/* Card credenziali */}
-        <div className="bg-white border border-gold/20 rounded-2xl shadow-sm overflow-hidden mb-4">
-          <div className="bg-gradient-to-r from-gold/10 to-rose/10 px-5 py-4 border-b border-gold/10">
-            <p className="font-playfair text-gold text-base">🎁 Accedi alla lista regali</p>
-            <p className="text-xs text-charcoal/50 mt-0.5">Usa queste credenziali sul sito</p>
-          </div>
+        <div style={{
+          background: '#fff',
+          border: '1px solid rgba(184,150,62,0.18)',
+          padding: '2rem',
+          position: 'relative',
+        }}>
+          {/* Angolini */}
+          <div style={{ position: 'absolute', top: 8, left: 8, width: 14, height: 14, borderTop: '1px solid rgba(184,150,62,0.4)', borderLeft: '1px solid rgba(184,150,62,0.4)' }}/>
+          <div style={{ position: 'absolute', bottom: 8, right: 8, width: 14, height: 14, borderBottom: '1px solid rgba(184,150,62,0.4)', borderRight: '1px solid rgba(184,150,62,0.4)' }}/>
 
-          <div className="px-5 py-4 space-y-3">
-            <CopyField label="Utente" value={GIFT_CREDENTIALS.user} />
-            <CopyField label="Password" value={GIFT_CREDENTIALS.pass} />
-          </div>
+          <p className="label-elegant mb-5">Accedi con queste credenziali</p>
+          <CopyField label="Utente" value={GIFT_CREDENTIALS.user} />
+          <CopyField label="Password" value={GIFT_CREDENTIALS.pass} />
 
-          <div className="px-5 pb-5">
-            <a
-              href={WEDDING.giftListUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full bg-gold text-white font-playfair py-3 rounded-xl hover:bg-gold/90 transition-colors shadow-sm"
-            >
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/>
-              </svg>
-              Apri il sito
-            </a>
-          </div>
+          <a
+            href={WEDDING.giftListUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              marginTop: '1.75rem', width: '100%',
+              background: 'transparent',
+              border: '1px solid rgba(184,150,62,0.5)',
+              color: '#B8963E', textDecoration: 'none',
+              fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase',
+              padding: '13px 0',
+              transition: 'all 0.25s',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#B8963E'; e.currentTarget.style.color = '#fff' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B8963E' }}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+              <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>
+              <polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/>
+            </svg>
+            Sfoglia la lista
+          </a>
         </div>
-
-        <p className="text-xs text-center text-charcoal/40">
+        <p style={{ fontSize: '0.68rem', color: 'rgba(44,36,32,0.35)', letterSpacing: '0.06em', textAlign: 'center', marginTop: 12 }}>
           Copia le credenziali prima di aprire il sito
         </p>
       </motion.div>

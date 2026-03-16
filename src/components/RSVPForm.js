@@ -6,171 +6,214 @@ import { createClient } from '@/lib/supabase'
 import PetalRain from './PetalRain'
 
 const STATUS_OPTIONS = [
-  { value: 'yes', label: 'Ci sarò! 🎉', color: 'bg-green-50 border-green-400 text-green-700' },
-  { value: 'maybe', label: 'Forse 🤔', color: 'bg-amber-50 border-amber-400 text-amber-700' },
-  { value: 'no', label: 'Non posso 😢', color: 'bg-red-50 border-red-400 text-red-700' },
+  { value: 'yes',   label: 'Parteciperò con gioia' },
+  { value: 'maybe', label: 'Forse, vi farò sapere'  },
+  { value: 'no',    label: 'Purtroppo non potrò'    },
 ]
 
 export default function RSVPForm({ guest }) {
-  const [status, setStatus] = useState(guest?.rsvp_status !== 'pending' ? guest?.rsvp_status : null)
+  const [status, setStatus]       = useState(guest?.rsvp_status !== 'pending' ? guest?.rsvp_status : null)
   const [allergies, setAllergies] = useState(guest?.allergies || '')
-  const [message, setMessage] = useState(guest?.message || '')
-  const [loading, setLoading] = useState(false)
+  const [message, setMessage]     = useState(guest?.message   || '')
+  const [loading, setLoading]     = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState(null)
+  const [error, setError]         = useState(null)
   const [showPetals, setShowPetals] = useState(false)
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!status) {
-      setError('Seleziona la tua presenza')
-      return
-    }
+    if (!status) { setError('Seleziona la tua presenza'); return }
     setLoading(true)
     setError(null)
-
     const supabase = createClient()
     const { error: dbError } = await supabase
       .from('guests')
-      .update({
-        rsvp_status: status,
-        allergies: allergies || null,
-        message: message || null,
-        responded_at: new Date().toISOString(),
-      })
+      .update({ rsvp_status: status, allergies: allergies || null, message: message || null, responded_at: new Date().toISOString() })
       .eq('slug', guest.slug)
-
     setLoading(false)
-
-    if (dbError) {
-      setError('Errore nel salvataggio. Riprova o contattaci.')
-      return
-    }
-
+    if (dbError) { setError('Errore nel salvataggio. Riprova o contattaci.'); return }
     setSubmitted(true)
     setShowPetals(true)
     setTimeout(() => setShowPetals(false), 6000)
   }
 
   return (
-    <section className="py-16 px-4">
+    <section className="py-24 px-4">
       <PetalRain active={showPetals} count={50} />
 
-      <motion.h2
-        className="font-playfair text-3xl sm:text-4xl text-gold text-center mb-2"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-      >
-        Conferma la presenza
-      </motion.h2>
       <motion.p
-        className="text-center text-rose/60 mb-10"
+        className="label-elegant text-center mb-4"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.2 }}
       >
-        Ci farebbe molto piacere averti con noi
+        Fateci sapere
       </motion.p>
+      <motion.h2
+        className="font-playfair text-charcoal text-center mb-16"
+        style={{ fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 400 }}
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1 }}
+      >
+        Conferma la presenza
+      </motion.h2>
 
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div
             key="thanks"
-            className="max-w-md mx-auto text-center py-10"
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200 }}
+            className="max-w-sm mx-auto text-center py-12"
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
-            <div className="text-5xl mb-4">🌸</div>
-            <h3 className="font-playfair text-2xl text-gold mb-3">
-              Grazie, {guest?.name?.split(' ')[0]}!
+            {/* Piccolo ornamento */}
+            <div className="flex justify-center mb-6">
+              <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+                <path d="M16 2 L19 11 L28 11 L21 17 L24 26 L16 20 L8 26 L11 17 L4 11 L13 11 Z"
+                  fill="#B8963E" fillOpacity="0.35"/>
+              </svg>
+            </div>
+            <h3 className="font-playfair text-charcoal mb-4" style={{ fontSize: '1.5rem', fontWeight: 400 }}>
+              Grazie, {guest?.name?.split(' ')[0]}
             </h3>
-            <p className="text-charcoal/70 leading-relaxed">
-              Non vediamo l&apos;ora di festeggiare con te il giorno più bello della nostra vita.
+            <p style={{ fontSize: '0.88rem', color: 'rgba(44,36,32,0.5)', lineHeight: 1.8, fontStyle: 'italic' }}>
+              Non vediamo l&apos;ora di festeggiare con voi<br/>il giorno più bello della nostra vita.
             </p>
           </motion.div>
         ) : (
           <motion.form
             key="form"
             onSubmit={handleSubmit}
-            className="max-w-md mx-auto bg-white rounded-2xl border border-gold/20 shadow-sm p-6 sm:p-8"
+            className="max-w-sm mx-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
           >
             {/* Nome ospite */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-charcoal/70 mb-2 tracking-wide uppercase">
-                Ospite
-              </label>
-              <div className="w-full bg-cream border border-gold/20 rounded-lg px-4 py-3 text-charcoal/80 font-playfair">
+            <div className="mb-8">
+              <p className="label-elegant mb-3">Ospite</p>
+              <p className="font-playfair text-charcoal" style={{ fontSize: '1.05rem', fontWeight: 400 }}>
                 {guest?.name || '—'}
-              </div>
+              </p>
+              <div style={{ height: 1, background: 'rgba(184,150,62,0.2)', marginTop: 8 }}/>
             </div>
 
             {/* Presenza */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-charcoal/70 mb-3 tracking-wide uppercase">
-                Sarò presente? *
-              </label>
-              <div className="grid grid-cols-1 gap-3">
-                {STATUS_OPTIONS.map((opt) => (
-                  <button
+            <div className="mb-8">
+              <p className="label-elegant mb-4">Sarò presente</p>
+              <div className="flex flex-col gap-0">
+                {STATUS_OPTIONS.map((opt, i) => (
+                  <label
                     key={opt.value}
-                    type="button"
-                    onClick={() => setStatus(opt.value)}
-                    className={`w-full border-2 rounded-xl py-3 px-4 text-center font-medium transition-all duration-200 ${
-                      status === opt.value
-                        ? opt.color + ' scale-[1.02] shadow-sm'
-                        : 'border-gray-200 text-gray-500 hover:border-gold/40'
-                    }`}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 14,
+                      padding: '14px 0',
+                      borderBottom: i < STATUS_OPTIONS.length - 1 ? '1px solid rgba(184,150,62,0.12)' : 'none',
+                      cursor: 'pointer',
+                    }}
                   >
-                    {opt.label}
-                  </button>
+                    {/* Radio elegante */}
+                    <div
+                      onClick={() => setStatus(opt.value)}
+                      style={{
+                        width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+                        border: `1px solid ${status === opt.value ? '#B8963E' : 'rgba(44,36,32,0.2)'}`,
+                        background: '#FAF7F2',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        transition: 'border-color 0.2s',
+                      }}
+                    >
+                      {status === opt.value && (
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#B8963E' }}/>
+                      )}
+                    </div>
+                    <span
+                      onClick={() => setStatus(opt.value)}
+                      style={{
+                        fontSize: '0.88rem',
+                        color: status === opt.value ? '#2C2420' : 'rgba(44,36,32,0.45)',
+                        fontWeight: status === opt.value ? 400 : 300,
+                        letterSpacing: '0.02em',
+                        transition: 'color 0.2s',
+                      }}
+                    >
+                      {opt.label}
+                    </span>
+                  </label>
                 ))}
               </div>
             </div>
 
             {/* Allergie */}
-            <div className="mb-5">
-              <label className="block text-sm font-medium text-charcoal/70 mb-2 tracking-wide uppercase">
-                Allergie o intolleranze alimentari
-              </label>
+            <div className="mb-6">
+              <p className="label-elegant mb-3">Allergie o intolleranze</p>
               <textarea
                 value={allergies}
                 onChange={(e) => setAllergies(e.target.value)}
                 rows={2}
-                placeholder="es. noci, glutine, lattosio…"
-                className="w-full border border-gold/20 rounded-lg px-4 py-3 text-charcoal/80 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/50"
+                placeholder="es. glutine, latticini, frutta secca…"
+                style={{
+                  width: '100%', resize: 'none', outline: 'none',
+                  background: 'transparent',
+                  border: 'none', borderBottom: '1px solid rgba(184,150,62,0.2)',
+                  padding: '8px 0', fontSize: '0.85rem',
+                  color: '#2C2420', fontWeight: 300, letterSpacing: '0.02em',
+                  fontFamily: "'Lato', sans-serif",
+                }}
               />
             </div>
 
             {/* Messaggio */}
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-charcoal/70 mb-2 tracking-wide uppercase">
-                Un messaggio per gli sposi
-                <span className="ml-1 text-charcoal/40 normal-case">(facoltativo)</span>
-              </label>
+            <div className="mb-10">
+              <p className="label-elegant mb-3">
+                Un pensiero per gli sposi
+                <span style={{ marginLeft: 8, textTransform: 'none', letterSpacing: 0, color: 'rgba(44,36,32,0.35)', fontSize: '0.65rem' }}>(facoltativo)</span>
+              </p>
               <textarea
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 rows={3}
                 placeholder="Scrivi qualcosa di speciale…"
-                className="w-full border border-gold/20 rounded-lg px-4 py-3 text-charcoal/80 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/50"
+                style={{
+                  width: '100%', resize: 'none', outline: 'none',
+                  background: 'transparent',
+                  border: 'none', borderBottom: '1px solid rgba(184,150,62,0.2)',
+                  padding: '8px 0', fontSize: '0.85rem',
+                  color: '#2C2420', fontWeight: 300, letterSpacing: '0.02em',
+                  fontFamily: "'Lato', sans-serif",
+                }}
               />
             </div>
 
             {error && (
-              <p className="text-red-500 text-sm mb-4 text-center">{error}</p>
+              <p style={{ fontSize: '0.78rem', color: '#c0392b', textAlign: 'center', marginBottom: '1rem', letterSpacing: '0.03em' }}>
+                {error}
+              </p>
             )}
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gold text-white font-playfair text-lg py-3.5 rounded-full hover:bg-gold/90 transition-colors shadow-md disabled:opacity-60"
+              style={{
+                width: '100%',
+                background: 'transparent',
+                border: '1px solid rgba(184,150,62,0.5)',
+                color: '#B8963E',
+                fontFamily: "'Lato', sans-serif",
+                fontSize: '0.72rem',
+                letterSpacing: '0.22em',
+                textTransform: 'uppercase',
+                padding: '14px 0',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                opacity: loading ? 0.6 : 1,
+                transition: 'background 0.25s, color 0.25s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#B8963E'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B8963E' }}
             >
-              {loading ? 'Invio in corso…' : 'Invia conferma ✨'}
+              {loading ? 'Invio in corso…' : 'Invia conferma'}
             </button>
           </motion.form>
         )}
