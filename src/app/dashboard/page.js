@@ -20,6 +20,76 @@ function slugify(name) {
     .replace(/^-+|-+$/g, '')
 }
 
+function LinkBox({ slug, onClose }) {
+  const [copied, setCopied] = useState(false)
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}/invite/${slug}`
+    : `/invite/${slug}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="mt-3 bg-green-50 border border-green-200 rounded-xl p-4">
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-xs font-medium text-green-700">✓ Ospite aggiunto! Ecco il link da inviare:</p>
+        <button onClick={onClose} className="text-green-400 hover:text-green-600 text-lg leading-none">×</button>
+      </div>
+      <div className="flex items-center gap-2">
+        <code className="flex-1 text-xs bg-white border border-green-200 rounded-lg px-3 py-2 text-charcoal/70 truncate">
+          {url}
+        </code>
+        <button
+          onClick={handleCopy}
+          className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+            copied
+              ? 'bg-green-500 text-white'
+              : 'bg-white border border-green-300 text-green-700 hover:bg-green-100'
+          }`}
+        >
+          {copied ? '✓ Copiato!' : 'Copia'}
+        </button>
+      </div>
+    </div>
+  )
+}
+
+function DeleteConfirm({ guest, onConfirm, onCancel, loading }) {
+  return (
+    <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
+      <div className="bg-white rounded-2xl shadow-2xl p-6 max-w-sm w-full">
+        <h3 className="font-playfair text-lg text-charcoal mb-2">Elimina ospite</h3>
+        <p className="text-charcoal/60 text-sm mb-5">
+          Sei sicuro di voler eliminare <strong>{guest.name}</strong>?
+          {guest.rsvp_status !== 'pending' && (
+            <span className="block mt-1 text-amber-600">
+              Attenzione: ha già risposto all&apos;invito.
+            </span>
+          )}
+        </p>
+        <div className="flex gap-3">
+          <button
+            onClick={onCancel}
+            className="flex-1 border border-gray-200 text-charcoal/70 py-2.5 rounded-lg text-sm hover:bg-gray-50 transition-colors"
+          >
+            Annulla
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={loading}
+            className="flex-1 bg-red-500 text-white py-2.5 rounded-lg text-sm hover:bg-red-600 transition-colors disabled:opacity-60"
+          >
+            {loading ? 'Eliminazione…' : 'Elimina'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const supabase = createClient()
@@ -27,13 +97,23 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
+  // form aggiungi ospite
   const [newName, setNewName] = useState('')
+  const [newMaxGuests, setNewMaxGuests] = useState(1)
   const [addingGuest, setAddingGuest] = useState(false)
+  const [newGuestSlug, setNewGuestSlug] = useState(null)
+  // elimina
+  const [deleteTarget, setDeleteTarget] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
+  // altri
   const [reminderLoading, setReminderLoading] = useState(false)
   const [toast, setToast] = useState(null)
 
   const fetchGuests = useCallback(async () => {
-    const { data } = await supabase.from('guests').select('*').order('created_at', { ascending: false })
+    const { data } = await supabase
+      .from('guests')
+      .select('*')
+      .order('created_at', { ascending: false })
     setGuests(data || [])
     setLoading(false)
   }, [supabase])
@@ -56,16 +136,42 @@ export default function DashboardPage() {
     e.preventDefault()
     if (!newName.trim()) return
     setAddingGuest(true)
+    setNewGuestSlug(null)
     const slug = slugify(newName.trim())
-    const { error } = await supabase.from('guests').insert({ name: newName.trim(), slug })
+    const { error } = await supabase
+      .from('guests')
+      .insert({ name: newName.trim(), slug, max_guests: newMaxGuests })
     if (error) {
-      showToast(error.message.includes('unique') ? 'Slug già esistente, prova un nome diverso' : error.message, 'error')
+      showToast(
+        error.message.includes('unique')
+          ? 'Slug già esistente, prova un nome diverso'
+          : error.message,
+        'error'
+      )
     } else {
+      setNewGuestSlug(slug)
       setNewName('')
+      setNewMaxGuests(1)
       fetchGuests()
-      showToast(`Ospite "${newName.trim()}" aggiunto. Link: /invite/${slug}`)
     }
     setAddingGuest(false)
+  }
+
+  const handleDelete = async () => {
+    if (!deleteTarget) return
+    setDeletingId(deleteTarget.id)
+    const { error } = await supabase
+      .from('guests')
+      .delete()
+      .eq('id', deleteTarget.id)
+    if (error) {
+      showToast('Errore eliminazione: ' + error.message, 'error')
+    } else {
+      showToast(`"${deleteTarget.name}" eliminato`)
+      fetchGuests()
+    }
+    setDeletingId(null)
+    setDeleteTarget(null)
   }
 
   const handleSendReminders = async () => {
@@ -88,10 +194,11 @@ export default function DashboardPage() {
   }
 
   const handleExportCSV = () => {
-    const headers = ['Nome', 'Slug', 'RSVP', 'Allergie', 'Messaggio', 'Risposto il', 'Creato il']
+    const headers = ['Nome', 'Slug', 'Persone', 'RSVP', 'Allergie', 'Messaggio', 'Risposto il', 'Creato il']
     const rows = guests.map((g) => [
       g.name,
       g.slug,
+      g.max_guests,
       STATUS_LABELS[g.rsvp_status]?.label || g.rsvp_status,
       g.allergies || '',
       g.message || '',
@@ -110,7 +217,9 @@ export default function DashboardPage() {
 
   const filtered = guests.filter((g) => {
     const matchFilter = filter === 'all' || g.rsvp_status === filter
-    const matchSearch = g.name.toLowerCase().includes(search.toLowerCase()) || g.slug.includes(search.toLowerCase())
+    const matchSearch =
+      g.name.toLowerCase().includes(search.toLowerCase()) ||
+      g.slug.includes(search.toLowerCase())
     return matchFilter && matchSearch
   })
 
@@ -124,9 +233,19 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-cream">
+      {/* Modale conferma eliminazione */}
+      {deleteTarget && (
+        <DeleteConfirm
+          guest={deleteTarget}
+          onConfirm={handleDelete}
+          onCancel={() => setDeleteTarget(null)}
+          loading={!!deletingId}
+        />
+      )}
+
       {/* Toast */}
       {toast && (
-        <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium ${
+        <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
           toast.type === 'error' ? 'bg-red-500 text-white' :
           toast.type === 'info' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
         }`}>
@@ -189,30 +308,67 @@ export default function DashboardPage() {
         </div>
 
         {/* Aggiungi ospite */}
-        <form onSubmit={handleAddGuest} className="bg-white rounded-xl border border-gold/20 p-5 mb-6 shadow-sm">
-          <h2 className="font-playfair text-gold mb-3">Aggiungi ospite</h2>
-          <div className="flex gap-3">
-            <input
-              type="text"
-              value={newName}
-              onChange={(e) => setNewName(e.target.value)}
-              placeholder="Nome e cognome ospite"
-              className="flex-1 border border-gold/20 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
-            />
-            <button
-              type="submit"
-              disabled={addingGuest || !newName.trim()}
-              className="bg-gold text-white px-5 py-2 rounded-lg text-sm hover:bg-gold/90 transition-colors disabled:opacity-60"
-            >
-              {addingGuest ? '…' : 'Aggiungi'}
-            </button>
-          </div>
-          {newName.trim() && (
-            <p className="text-xs text-charcoal/50 mt-2">
-              Link generato: <span className="font-mono text-gold">/invite/{slugify(newName.trim())}</span>
-            </p>
+        <div className="bg-white rounded-xl border border-gold/20 p-5 mb-6 shadow-sm">
+          <h2 className="font-playfair text-gold mb-4">Aggiungi ospite</h2>
+          <form onSubmit={handleAddGuest}>
+            <div className="flex flex-col sm:flex-row gap-3">
+              {/* Nome */}
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => { setNewName(e.target.value); setNewGuestSlug(null) }}
+                placeholder="Nome (es. Famiglia Rossi)"
+                className="flex-1 border border-gold/20 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
+              />
+              {/* Numero persone */}
+              <div className="flex items-center gap-2 flex-shrink-0">
+                <label className="text-xs text-charcoal/50 whitespace-nowrap">N° persone</label>
+                <div className="flex items-center border border-gold/20 rounded-lg overflow-hidden bg-cream/40">
+                  <button
+                    type="button"
+                    onClick={() => setNewMaxGuests((n) => Math.max(1, n - 1))}
+                    className="px-3 py-2.5 text-gold hover:bg-gold/10 transition-colors text-lg leading-none font-bold"
+                  >
+                    −
+                  </button>
+                  <span className="w-8 text-center text-sm font-medium text-charcoal">
+                    {newMaxGuests}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setNewMaxGuests((n) => Math.min(20, n + 1))}
+                    className="px-3 py-2.5 text-gold hover:bg-gold/10 transition-colors text-lg leading-none font-bold"
+                  >
+                    +
+                  </button>
+                </div>
+              </div>
+              {/* Submit */}
+              <button
+                type="submit"
+                disabled={addingGuest || !newName.trim()}
+                className="bg-gold text-white px-6 py-2.5 rounded-lg text-sm hover:bg-gold/90 transition-colors disabled:opacity-60 flex-shrink-0"
+              >
+                {addingGuest ? '…' : 'Aggiungi'}
+              </button>
+            </div>
+
+            {/* Anteprima slug */}
+            {newName.trim() && !newGuestSlug && (
+              <p className="text-xs text-charcoal/40 mt-2">
+                Slug: <span className="font-mono text-gold/70">{slugify(newName.trim())}</span>
+                {newMaxGuests > 1 && (
+                  <span className="ml-2 text-charcoal/40">· invito per {newMaxGuests} persone</span>
+                )}
+              </p>
+            )}
+          </form>
+
+          {/* Link generato dopo aggiunta */}
+          {newGuestSlug && (
+            <LinkBox slug={newGuestSlug} onClose={() => setNewGuestSlug(null)} />
           )}
-        </form>
+        </div>
 
         {/* Filtri + ricerca */}
         <div className="flex flex-col sm:flex-row gap-3 mb-4">
@@ -250,17 +406,19 @@ export default function DashboardPage() {
                 <thead>
                   <tr className="bg-cream/60 border-b border-gold/10">
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60">Nome</th>
-                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Slug / Link</th>
+                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Link invito</th>
+                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Persone</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60">RSVP</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60 hidden sm:table-cell">Allergie</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60 hidden md:table-cell">Messaggio</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60 hidden lg:table-cell">Risposto</th>
+                    <th className="px-4 py-3"></th>
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="text-center py-10 text-charcoal/40">
+                      <td colSpan={8} className="text-center py-10 text-charcoal/40">
                         Nessun ospite trovato
                       </td>
                     </tr>
@@ -269,25 +427,40 @@ export default function DashboardPage() {
                       <tr key={g.id} className="border-b border-gray-50 hover:bg-cream/30 transition-colors">
                         <td className="px-4 py-3 font-medium text-charcoal">{g.name}</td>
                         <td className="px-4 py-3">
-                          <code className="text-xs text-gold/80 bg-gold/5 px-2 py-0.5 rounded">
-                            {g.slug}
-                          </code>
+                          <GuestLinkCell slug={g.slug} />
+                        </td>
+                        <td className="px-4 py-3 text-center">
+                          <span className="inline-flex items-center gap-1 text-charcoal/70 text-xs">
+                            👥 {g.max_guests}
+                          </span>
                         </td>
                         <td className="px-4 py-3">
                           <span className={`inline-block border text-xs px-2 py-0.5 rounded-full ${STATUS_LABELS[g.rsvp_status]?.color}`}>
                             {STATUS_LABELS[g.rsvp_status]?.label}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-charcoal/60 hidden sm:table-cell max-w-[160px] truncate">
+                        <td className="px-4 py-3 text-charcoal/60 hidden sm:table-cell max-w-[140px] truncate">
                           {g.allergies || '—'}
                         </td>
-                        <td className="px-4 py-3 text-charcoal/60 hidden md:table-cell max-w-[200px] truncate">
+                        <td className="px-4 py-3 text-charcoal/60 hidden md:table-cell max-w-[180px] truncate">
                           {g.message || '—'}
                         </td>
-                        <td className="px-4 py-3 text-charcoal/50 text-xs hidden lg:table-cell">
+                        <td className="px-4 py-3 text-charcoal/50 text-xs hidden lg:table-cell whitespace-nowrap">
                           {g.responded_at
                             ? new Date(g.responded_at).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' })
                             : '—'}
+                        </td>
+                        <td className="px-4 py-3">
+                          <button
+                            onClick={() => setDeleteTarget(g)}
+                            className="text-red-300 hover:text-red-500 transition-colors p-1 rounded"
+                            title="Elimina ospite"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                          </button>
                         </td>
                       </tr>
                     ))
@@ -298,6 +471,37 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
+    </div>
+  )
+}
+
+// Cella link con copia inline
+function GuestLinkCell({ slug }) {
+  const [copied, setCopied] = useState(false)
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}/invite/${slug}`
+    : `/invite/${slug}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 max-w-[200px]">
+      <code className="text-xs text-gold/70 truncate">/invite/{slug}</code>
+      <button
+        onClick={handleCopy}
+        className={`flex-shrink-0 text-xs px-2 py-0.5 rounded transition-colors ${
+          copied
+            ? 'text-green-600 bg-green-50'
+            : 'text-charcoal/40 hover:text-gold hover:bg-gold/5'
+        }`}
+        title="Copia link"
+      >
+        {copied ? '✓' : '⎘'}
+      </button>
     </div>
   )
 }

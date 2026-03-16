@@ -11,12 +11,16 @@ create table if not exists public.guests (
   id            uuid primary key default gen_random_uuid(),
   name          text not null,
   slug          text not null unique,
+  max_guests    integer not null default 1,  -- numero massimo di persone per questo invito
   rsvp_status   text check (rsvp_status in ('yes', 'no', 'maybe', 'pending')) default 'pending',
   allergies     text,
   message       text,
   responded_at  timestamptz,
   created_at    timestamptz default now()
 );
+
+-- Aggiunta colonna se la tabella esiste già (idempotente)
+alter table public.guests add column if not exists max_guests integer not null default 1;
 
 -- Indice sullo slug per ricerche veloci
 create index if not exists guests_slug_idx on public.guests(slug);
