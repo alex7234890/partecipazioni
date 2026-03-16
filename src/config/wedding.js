@@ -2,7 +2,7 @@ export const WEDDING = {
   groomName: "Matteo",
   brideName: "Clio",
   fullNames: "Matteo Filippelli & Clio Righetti",
-  date: "2025-09-20", // formato YYYY-MM-DD
+  date: "2025-09-20",
   time: "17:00",
   ceremonyLocation: {
     name: "Chiesa di Santa Maria delle Grazie",

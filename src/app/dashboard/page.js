@@ -224,11 +224,26 @@ export default function DashboardPage() {
   })
 
   const counts = {
-    total: guests.length,
-    yes: guests.filter((g) => g.rsvp_status === 'yes').length,
-    no: guests.filter((g) => g.rsvp_status === 'no').length,
-    maybe: guests.filter((g) => g.rsvp_status === 'maybe').length,
-    pending: guests.filter((g) => g.rsvp_status === 'pending').length,
+    // inviti (righe nel DB)
+    totalInvites: guests.length,
+    yesInvites: guests.filter((g) => g.rsvp_status === 'yes').length,
+    noInvites: guests.filter((g) => g.rsvp_status === 'no').length,
+    maybeInvites: guests.filter((g) => g.rsvp_status === 'maybe').length,
+    pendingInvites: guests.filter((g) => g.rsvp_status === 'pending').length,
+    // persone reali (somma max_guests)
+    totalPeople: guests.reduce((s, g) => s + (g.max_guests || 1), 0),
+    yesPeople: guests
+      .filter((g) => g.rsvp_status === 'yes')
+      .reduce((s, g) => s + (g.max_guests || 1), 0),
+    noPeople: guests
+      .filter((g) => g.rsvp_status === 'no')
+      .reduce((s, g) => s + (g.max_guests || 1), 0),
+    maybePeople: guests
+      .filter((g) => g.rsvp_status === 'maybe')
+      .reduce((s, g) => s + (g.max_guests || 1), 0),
+    pendingPeople: guests
+      .filter((g) => g.rsvp_status === 'pending')
+      .reduce((s, g) => s + (g.max_guests || 1), 0),
   }
 
   return (
@@ -269,20 +284,26 @@ export default function DashboardPage() {
 
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8">
         {/* Contatori */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
           {[
-            { label: 'Totale', value: counts.total, color: 'border-gray-200' },
-            { label: 'Confermati', value: counts.yes, color: 'border-green-200' },
-            { label: 'Declinati', value: counts.no, color: 'border-red-200' },
-            { label: 'Forse', value: counts.maybe, color: 'border-amber-200' },
-            { label: 'In attesa', value: counts.pending, color: 'border-gray-200' },
+            { label: 'Totale', invites: counts.totalInvites, people: counts.totalPeople, color: 'border-gray-200' },
+            { label: 'Confermati', invites: counts.yesInvites, people: counts.yesPeople, color: 'border-green-200' },
+            { label: 'Declinati', invites: counts.noInvites, people: counts.noPeople, color: 'border-red-200' },
+            { label: 'Forse', invites: counts.maybeInvites, people: counts.maybePeople, color: 'border-amber-200' },
+            { label: 'In attesa', invites: counts.pendingInvites, people: counts.pendingPeople, color: 'border-gray-200' },
           ].map((c) => (
             <div key={c.label} className={`bg-white rounded-xl border ${c.color} p-4 text-center shadow-sm`}>
-              <div className="font-playfair text-2xl text-gold">{c.value}</div>
-              <div className="text-xs text-charcoal/60 mt-1">{c.label}</div>
+              <div className="font-playfair text-2xl text-gold">{c.people}</div>
+              <div className="text-xs font-medium text-charcoal/70 mt-0.5">{c.label}</div>
+              <div className="text-xs text-charcoal/40 mt-1">
+                {c.invites} {c.invites === 1 ? 'invito' : 'inviti'}
+              </div>
             </div>
           ))}
         </div>
+        <p className="text-xs text-charcoal/40 mb-6 text-right">
+          Il numero grande indica le <strong>persone</strong>, quello piccolo gli <strong>inviti</strong>
+        </p>
 
         {/* Azioni */}
         <div className="flex flex-wrap gap-3 mb-6">
