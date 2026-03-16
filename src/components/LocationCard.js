@@ -3,79 +3,89 @@
 import { motion } from 'framer-motion'
 import { WEDDING } from '@/config/wedding'
 
-function LocationItem({ location, label, icon, delay }) {
+function LocationItem({ location, label, delay }) {
   return (
     <motion.div
-      className="bg-white rounded-2xl border border-gold/20 shadow-sm overflow-hidden"
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
-      transition={{ delay }}
+      transition={{ delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
+      style={{
+        background: '#fff',
+        border: '1px solid rgba(184,150,62,0.18)',
+        padding: '2rem',
+        position: 'relative',
+      }}
     >
-      <div className="bg-gradient-to-r from-gold/10 to-rose/10 px-6 py-4 border-b border-gold/10">
-        <div className="flex items-center gap-2">
-          <span className="text-xl">{icon}</span>
-          <span className="font-playfair text-gold font-semibold text-lg">{label}</span>
-        </div>
-      </div>
-      <div className="px-6 py-5">
-        <h3 className="font-playfair text-charcoal text-xl font-semibold mb-1">
-          {location.name}
-        </h3>
-        <p className="text-charcoal/60 text-sm mb-4">{location.address}</p>
-        <a
-          href={location.mapsUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 bg-gold text-white text-sm px-5 py-2.5 rounded-full hover:bg-gold/90 transition-colors shadow-sm"
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
-          </svg>
-          Apri in Google Maps
-        </a>
-      </div>
+      {/* Angolino decorativo */}
+      <div style={{
+        position: 'absolute', top: 10, left: 10,
+        width: 16, height: 16,
+        borderTop: '1px solid rgba(184,150,62,0.4)',
+        borderLeft: '1px solid rgba(184,150,62,0.4)',
+      }}/>
+      <div style={{
+        position: 'absolute', bottom: 10, right: 10,
+        width: 16, height: 16,
+        borderBottom: '1px solid rgba(184,150,62,0.4)',
+        borderRight: '1px solid rgba(184,150,62,0.4)',
+      }}/>
+
+      <p className="label-elegant mb-3">{label}</p>
+      <h3 className="font-playfair text-charcoal mb-1" style={{ fontSize: '1.15rem', fontWeight: 400 }}>
+        {location.name}
+      </h3>
+      <p style={{ fontSize: '0.78rem', color: 'rgba(44,36,32,0.45)', letterSpacing: '0.03em', marginBottom: '1.5rem', lineHeight: 1.6 }}>
+        {location.address}
+      </p>
+      <a
+        href={location.mapsUrl}
+        target="_blank"
+        rel="noopener noreferrer"
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          fontSize: '0.72rem', letterSpacing: '0.18em', textTransform: 'uppercase',
+          color: '#B8963E', textDecoration: 'none',
+          borderBottom: '1px solid rgba(184,150,62,0.35)',
+          paddingBottom: 2,
+          transition: 'opacity 0.2s',
+        }}
+      >
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7z"/>
+          <circle cx="12" cy="9" r="2.5"/>
+        </svg>
+        Indicazioni stradali
+      </a>
     </motion.div>
   )
 }
 
 export default function LocationCard() {
   return (
-    <section className="py-16 px-4">
-      <motion.h2
-        className="font-playfair text-3xl sm:text-4xl text-gold text-center mb-2"
-        initial={{ opacity: 0, y: 20 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-      >
-        Dove ci troviamo
-      </motion.h2>
+    <section className="py-24 px-4">
       <motion.p
-        className="text-center text-rose/60 mb-10 tracking-wide"
+        className="label-elegant text-center mb-4"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
-        transition={{ delay: 0.2 }}
       >
-        Le location della nostra giornata
+        Vi aspettiamo
       </motion.p>
+      <motion.h2
+        className="font-playfair text-charcoal text-center mb-16"
+        style={{ fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 400 }}
+        initial={{ opacity: 0, y: 16 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.1 }}
+      >
+        Le location
+      </motion.h2>
 
       <div className="max-w-2xl mx-auto grid gap-6 sm:grid-cols-2">
-        <LocationItem
-          location={WEDDING.ceremonyLocation}
-          label="Cerimonia"
-          icon="💍"
-          delay={0.1}
-        />
-        <LocationItem
-          location={WEDDING.receptionLocation}
-          label="Ricevimento"
-          icon="🥂"
-          delay={0.2}
-        />
+        <LocationItem location={WEDDING.ceremonyLocation} label="Cerimonia"   delay={0.1} />
+        <LocationItem location={WEDDING.receptionLocation} label="Ricevimento" delay={0.2} />
       </div>
     </section>
   )
