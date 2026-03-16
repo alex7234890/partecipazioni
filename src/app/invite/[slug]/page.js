@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import EnvelopeAnimation from '@/components/EnvelopeAnimation'
 import WeddingCard from '@/components/WeddingCard'
 import Countdown from '@/components/Countdown'
@@ -23,6 +23,7 @@ export default function InvitePage() {
   useEffect(() => {
     if (!slug) return
     const fetchGuest = async () => {
+      const supabase = createClient()
       const { data, error } = await supabase
         .from('guests')
         .select('*')

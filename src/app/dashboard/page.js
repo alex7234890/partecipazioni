@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 const STATUS_LABELS = {
@@ -22,6 +22,7 @@ function slugify(name) {
 
 export default function DashboardPage() {
   const router = useRouter()
+  const supabase = createClient()
   const [guests, setGuests] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
@@ -35,7 +36,7 @@ export default function DashboardPage() {
     const { data } = await supabase.from('guests').select('*').order('created_at', { ascending: false })
     setGuests(data || [])
     setLoading(false)
-  }, [])
+  }, [supabase])
 
   useEffect(() => {
     fetchGuests()
