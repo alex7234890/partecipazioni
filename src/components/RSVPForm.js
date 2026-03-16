@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { supabase } from '@/lib/supabase'
+import { createClient } from '@/lib/supabase'
 import PetalRain from './PetalRain'
 
 const STATUS_OPTIONS = [
@@ -29,6 +29,7 @@ export default function RSVPForm({ guest }) {
     setLoading(true)
     setError(null)
 
+    const supabase = createClient()
     const { error: dbError } = await supabase
       .from('guests')
       .update({
