@@ -58,8 +58,11 @@ create policy "guest_update_own"
 -- Dati di esempio (rimuovi o commenta in produzione)
 -- ============================================================
 
-insert into public.guests (name, slug) values
-  ('Marco Rossi', 'marco-rossi'),
-  ('Laura Bianchi', 'laura-bianchi'),
-  ('Giovanni Esposito', 'giovanni-esposito')
+insert into public.guests (name, slug, max_guests, rsvp_status, allergies, message, responded_at) values
+  ('Marco Rossi', 'marco-rossi', 1, 'yes', null, 'Felicissimo di esserci!', now() - interval '2 days'),
+  ('Famiglia Bianchi', 'famiglia-bianchi', 4, 'yes', 'Una persona è celiaca', 'Non vediamo l''ora!', now() - interval '1 day'),
+  ('Laura Verdi', 'laura-verdi', 1, 'no', null, 'Purtroppo sarò all''estero', now() - interval '3 days'),
+  ('Giovanni e Anna Esposito', 'giovanni-anna-esposito', 2, 'maybe', 'Anna è allergica alle noci', null, now() - interval '5 hours'),
+  ('Famiglia Ferretti', 'famiglia-ferretti', 3, 'pending', null, null, null),
+  ('Chiara Ricci', 'chiara-ricci', 1, 'pending', null, null, null)
 on conflict (slug) do nothing;
