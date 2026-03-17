@@ -24,32 +24,40 @@ function startAmbientPad() {
   } catch (e) { return null }
 }
 
+/* ── Audio globale indipendente dal lifecycle React ─────────────────────
+   new Audio() non è legato al DOM del componente: quando l'envelope
+   si smonta la musica continua a suonare fino alla chiusura della pagina.
+────────────────────────────────────────────────────────────────────── */
+function getOrCreateAudio() {
+  if (typeof window === 'undefined') return null
+  if (!window._weddingAudio) {
+    const a = new Audio('/music.mp3')
+    a.loop   = true
+    a.volume = 0.75
+    window._weddingAudio = a
+  }
+  return window._weddingAudio
+}
+
 export default function EnvelopeAnimation({ onOpen }) {
   const [phase, setPhase] = useState('idle')
-  const audioRef  = useRef(null)
   const padRef    = useRef(null)
   const playedRef = useRef(false)
 
-  /* ── Musica ─────────────────────────────────────────────────────────
-     Tentativo immediato al mount (funziona se il browser lo permette).
-     In caso contrario scatta al primo click, che è sempre consentito.
-  ─────────────────────────────────────────────────────────────────── */
+  /* Tentativo autoplay al mount — il browser lo concede spesso
+     se la pagina è già stata interagita (es. link esterno). */
   useEffect(() => {
-    const el = audioRef.current
-    if (!el) return
-    el.volume = 0.75
-    el.play().catch(() => {
-      /* autoplay bloccato — aspettiamo il click (handleClick lo riprova) */
-    })
+    const audio = getOrCreateAudio()
+    if (!audio) return
+    audio.play().catch(() => { /* bloccato — scatterà al click */ })
   }, [])
 
   const playMusic = () => {
     if (playedRef.current) return
     playedRef.current = true
-    const el = audioRef.current
-    if (el) {
-      el.volume = 0.75
-      el.play().catch(() => { padRef.current = startAmbientPad() })
+    const audio = getOrCreateAudio()
+    if (audio) {
+      audio.play().catch(() => { padRef.current = startAmbientPad() })
     } else {
       padRef.current = startAmbientPad()
     }
@@ -74,8 +82,6 @@ export default function EnvelopeAnimation({ onOpen }) {
       animate={isDone ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.65 }}
     >
-      <audio ref={audioRef} src="/music.mp3" loop preload="auto" />
-
       {/* Sfondo busta */}
       <div style={{
         position: 'absolute', inset: 0,
