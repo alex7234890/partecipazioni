@@ -53,12 +53,12 @@ export default function EnvelopeAnimation({ onOpen }) {
       <audio ref={audioRef} src="/music.mp3" loop preload="none" />
 
       {/* ── Envelope background photo ───────────────────────────────────
-          Put your image at:  /public/envelope-bg.jpg
+          Put your image at:  /public/envelope-bg.png
           It will cover the whole screen and be cropped to center.
       ────────────────────────────────────────────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
-        backgroundImage: "url('/envelope-bg.jpg')",
+        backgroundImage: "url('/envelope-bg.png')",
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -130,7 +130,7 @@ export default function EnvelopeAnimation({ onOpen }) {
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-            backgroundImage: "url('/envelope-bg.jpg')",
+            backgroundImage: "url('/envelope-bg.png')",
             backgroundSize: 'cover',
             backgroundPosition: 'center top',
             backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
