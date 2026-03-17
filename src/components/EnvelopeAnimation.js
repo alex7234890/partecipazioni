@@ -300,8 +300,8 @@ export default function EnvelopeAnimation({ onOpen }) {
               style={{
                 display: 'block',
                 width: 140, height: 140,
-                objectFit: 'cover',
-                borderRadius: '50%',
+                objectFit: 'contain',
+                mixBlendMode: 'multiply',
               }}
             />
           </div>
