@@ -13,11 +13,11 @@ export default function EnvelopeAnimation({ onOpen }) {
     setPhase('playing')
     if (videoRef.current) videoRef.current.play()
 
-    // Dopo 1.5s dal tocco: dissolvi e apri la partecipazione
+    // Dopo 3s dal tocco: dissolvi e apri la partecipazione
     timerRef.current = setTimeout(() => {
       setPhase('done')
       setTimeout(() => onOpen?.(), 650)
-    }, 1500)
+    }, 3000)
   }
 
   const isIdle = phase === 'idle'
@@ -45,7 +45,7 @@ export default function EnvelopeAnimation({ onOpen }) {
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
           objectFit: 'cover',
-          transform: 'scale(1.40)',
+          transform: 'scale(1.22)',
           transformOrigin: 'center center',
         }}
       />

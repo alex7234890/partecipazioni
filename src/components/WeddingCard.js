@@ -40,7 +40,7 @@ export default function WeddingCard({ guestName }) {
   }, [])
 
   return (
-    <section className="relative min-h-screen overflow-hidden flex items-end">
+    <section className="relative min-h-screen overflow-hidden">
 
       {/* ── SVG: filtro olio pittura ────────────────────────────────────── */}
       <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
@@ -61,7 +61,7 @@ export default function WeddingCard({ guestName }) {
         </defs>
       </svg>
 
-      {/* ── Foto fullscreen: schiarita + Ken Burns + parallax ────────── */}
+      {/* ── Foto fullscreen schiarita + Ken Burns + parallax ────────── */}
       <motion.div
         className="absolute inset-0"
         style={{ perspective: 1400 }}
@@ -103,103 +103,105 @@ export default function WeddingCard({ guestName }) {
         <rect width="100%" height="100%" filter="url(#canvas-weave)" />
       </svg>
 
-      {/* Vignetta leggera ai bordi */}
+      {/* Vignetta leggera */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: 'radial-gradient(ellipse 85% 80% at 50% 38%, transparent 35%, rgba(8,4,2,0.28) 100%)',
       }} />
 
-      {/* Gradiente basso — ridotto per leggibilità testo nero */}
+      {/* Gradiente basso leggero per aiutare leggibilità testo in basso */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'linear-gradient(to bottom, transparent 45%, rgba(255,255,255,0.32) 100%)',
+        background: 'linear-gradient(to bottom, transparent 55%, rgba(255,255,255,0.38) 100%)',
       }} />
 
-      {/* ── Testo ────────────────────────────────────────────────────── */}
+      {/* ── NOMI — in alto nella foto ──────────────────────────────────── */}
       <motion.div
-        className="relative z-10 w-full text-center"
-        style={{ padding: '2rem 1.5rem 38vh' }}
-        initial={{ opacity: 0, y: 36 }}
+        className="absolute z-10 w-full text-center"
+        style={{ top: '12%', left: 0, right: 0, padding: '0 1.5rem' }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+        transition={{ delay: 0.4, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
       >
         <p style={{
           fontFamily: "'Lato', sans-serif",
           fontSize: '0.60rem', letterSpacing: '0.32em',
-          color: 'rgba(0,0,0,0.55)',
-          marginBottom: '0.6rem', textTransform: 'uppercase',
+          color: 'rgba(0,0,0,0.50)',
+          marginBottom: '0.4rem', textTransform: 'uppercase',
         }}>
           Il matrimonio di
         </p>
 
-        {/* Nome sposo — sfalsato a sinistra */}
         <h1 style={{
           fontFamily: "'Allura', cursive",
           fontSize: 'clamp(4.8rem, 18vw, 9rem)',
           fontWeight: 400, lineHeight: 1.05,
           color: '#0A0A0A',
-          textShadow: '0 1px 8px rgba(255,255,255,0.25)',
-          margin: 0,
-          display: 'block',
+          textShadow: '0 1px 8px rgba(255,255,255,0.20)',
+          margin: 0, display: 'block',
           transform: 'translateX(-10%)',
         }}>
           {WEDDING.groomName}
         </h1>
 
-        {/* Nome sposa — sfalsata a destra, ravvicinata */}
         <h1 style={{
           fontFamily: "'Allura', cursive",
           fontSize: 'clamp(4.8rem, 18vw, 9rem)',
           fontWeight: 400, lineHeight: 1.05,
           color: '#0A0A0A',
-          textShadow: '0 1px 8px rgba(255,255,255,0.25)',
-          marginTop: '-0.6rem',
-          marginBottom: '1.0rem',
-          display: 'block',
+          textShadow: '0 1px 8px rgba(255,255,255,0.20)',
+          marginTop: '-0.5rem', display: 'block',
           transform: 'translateX(10%)',
         }}>
           {WEDDING.brideName}
         </h1>
+      </motion.div>
 
+      {/* ── INFO — in basso nella foto (come prima) ──────────────────── */}
+      <motion.div
+        className="absolute z-10 w-full text-center"
+        style={{ bottom: '4.5rem', left: 0, right: 0, padding: '0 1.5rem' }}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
+      >
         <p style={{
           fontFamily: "'Allura', cursive",
-          fontSize: 'clamp(1.15rem, 3.5vw, 1.6rem)',
-          color: 'rgba(0,0,0,0.68)',
-          marginBottom: '1.2rem',
-          letterSpacing: '0.02em',
+          fontSize: 'clamp(1.05rem, 3.2vw, 1.45rem)',
+          color: 'rgba(0,0,0,0.65)',
+          marginBottom: '0.9rem',
         }}>
           annunciano il loro matrimonio
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '1.0rem' }}>
-          <div style={{ height: 1, width: 48, background: 'rgba(0,0,0,0.28)' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '0.8rem' }}>
+          <div style={{ height: 1, width: 44, background: 'rgba(0,0,0,0.25)' }} />
           <svg width="7" height="7" viewBox="0 0 10 10">
             <path d="M5 0L6.2 3.8L10 5L6.2 6.2L5 10L3.8 6.2L0 5L3.8 3.8Z"
-              fill="#333" fillOpacity="0.55" />
+              fill="#333" fillOpacity="0.50" />
           </svg>
-          <div style={{ height: 1, width: 48, background: 'rgba(0,0,0,0.28)' }} />
+          <div style={{ height: 1, width: 44, background: 'rgba(0,0,0,0.25)' }} />
         </div>
 
         <p style={{
           fontFamily: "'Allura', cursive",
-          fontSize: 'clamp(1.1rem, 3.5vw, 1.55rem)',
-          color: 'rgba(0,0,0,0.72)',
-          marginBottom: '0.2rem',
+          fontSize: 'clamp(1.0rem, 3.2vw, 1.45rem)',
+          color: 'rgba(0,0,0,0.70)',
+          marginBottom: '0.15rem',
         }}>
           {formatDate(WEDDING.date)}
         </p>
         <p style={{
           fontFamily: "'Lato', sans-serif",
-          fontSize: '0.60rem', letterSpacing: '0.26em',
-          color: 'rgba(0,0,0,0.50)',
-          marginBottom: '0.4rem',
+          fontSize: '0.58rem', letterSpacing: '0.26em',
+          color: 'rgba(0,0,0,0.48)',
+          marginBottom: '0.35rem',
           textTransform: 'uppercase',
         }}>
           Ore {WEDDING.time}
         </p>
         <p style={{
           fontFamily: "'Allura', cursive",
-          fontSize: 'clamp(1.4rem, 5vw, 2.2rem)',
-          color: 'rgba(0,0,0,0.72)',
-          letterSpacing: '0.02em',
+          fontSize: 'clamp(1.3rem, 4.5vw, 2rem)',
+          color: 'rgba(0,0,0,0.68)',
         }}>
           {WEDDING.receptionLocation.name}
         </p>
@@ -207,39 +209,30 @@ export default function WeddingCard({ guestName }) {
         {guestName && (
           <p style={{
             fontFamily: "'Allura', cursive",
-            fontSize: 'clamp(1.1rem, 3.2vw, 1.5rem)',
-            lineHeight: 1.75,
-            color: 'rgba(0,0,0,0.58)',
-            marginTop: '1.6rem',
+            fontSize: 'clamp(1.0rem, 3vw, 1.35rem)',
+            lineHeight: 1.7,
+            color: 'rgba(0,0,0,0.55)',
+            marginTop: '1.2rem',
           }}>
-            Con affetto vi invitiamo,<br />
-            <span style={{ color: 'rgba(0,0,0,0.65)' }}>{guestName}</span>
+            Con affetto vi invitiamo, <span style={{ color: 'rgba(0,0,0,0.62)' }}>{guestName}</span>
           </p>
         )}
       </motion.div>
 
       {/* Scroll hint */}
       <motion.div
-        className="absolute bottom-6 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 cursor-pointer z-10"
+        className="absolute bottom-4 left-1/2 -translate-x-1/2 flex flex-col items-center gap-1 cursor-pointer z-10"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.8 }}
         onClick={() => window.scrollBy({ top: window.innerHeight, behavior: 'smooth' })}
       >
-        <span style={{
-          fontFamily: "'Lato', sans-serif",
-          fontSize: '0.54rem', letterSpacing: '0.32em',
-          color: 'rgba(0,0,0,0.38)',
-          textTransform: 'uppercase',
-        }}>
-          Scorri
-        </span>
         <motion.svg width="12" height="8" viewBox="0 0 14 9" fill="none"
           animate={{ y: [0, 4, 0] }}
           transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
         >
           <path d="M1 1L7 7L13 1" stroke="#333" strokeWidth="1.2"
-            strokeLinecap="round" strokeOpacity="0.40" />
+            strokeLinecap="round" strokeOpacity="0.35" />
         </motion.svg>
       </motion.div>
     </section>

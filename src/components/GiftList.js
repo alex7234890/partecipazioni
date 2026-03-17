@@ -72,7 +72,7 @@ export default function GiftList() {
         viewport={{ once: true }}
         transition={{ delay: 0.2 }}
       >
-        Se desiderate farci un regalo, abbiamo preparato una lista con tutto ciò che ci serve per il nostro nido d&apos;amore.
+        Se desiderate farci un regalo, il modo più bello per farlo è contribuire al nostro viaggio di nozze — ogni piccolo gesto ci aiuterà a vivere un&apos;avventura indimenticabile insieme.
       </motion.p>
 
       <motion.div
