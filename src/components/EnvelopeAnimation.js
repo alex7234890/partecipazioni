@@ -21,11 +21,25 @@ export default function EnvelopeAnimation({ onOpen }) {
   const timerRef  = useRef(null)
   const playedRef = useRef(false)
 
+  // autoPlay muted playsInline → iOS è costretto a caricare il video
+  // (senza questo, iOS ignora preload e non mostra nulla finché l'utente
+  // non interagisce). onLoadedData = primo frame disponibile → pausa subito.
+  const handleVideoLoaded = () => {
+    if (videoRef.current) {
+      videoRef.current.pause()
+      videoRef.current.currentTime = 0
+    }
+    setVideoReady(true)
+  }
+
   const handleTap = () => {
     if (phase !== 'idle') return
     setPhase('playing')
 
-    if (videoRef.current) videoRef.current.play()
+    if (videoRef.current) {
+      videoRef.current.currentTime = 0
+      videoRef.current.play()
+    }
 
     if (!playedRef.current) {
       playedRef.current = true
@@ -50,17 +64,14 @@ export default function EnvelopeAnimation({ onOpen }) {
       transition={{ duration: 0.65 }}
       onClick={handleTap}
     >
-      {/* Video — opacity 0 finché non è pronto (onCanPlay).
-          Su Android/desktop preload funziona e onCanPlay scatta subito.
-          Su iOS il background #EDE6D9 mostra attraverso finché l'utente tocca
-          (il flash bianco alla apertura link è risolto dall'html background). */}
       <video
         ref={videoRef}
         src="/envelope-video.mp4"
-        playsInline
+        autoPlay
         muted
+        playsInline
         preload="auto"
-        onCanPlay={() => setVideoReady(true)}
+        onLoadedData={handleVideoLoaded}
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
@@ -68,11 +79,10 @@ export default function EnvelopeAnimation({ onOpen }) {
           transform: 'scale(1.22)',
           transformOrigin: 'center center',
           opacity: videoReady ? 1 : 0,
-          transition: 'opacity 0.4s ease',
+          transition: 'opacity 0.3s ease',
         }}
       />
 
-      {/* Hint */}
       <motion.div
         style={{
           position: 'absolute', bottom: '8%', left: '50%',
