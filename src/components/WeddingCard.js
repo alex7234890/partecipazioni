@@ -61,7 +61,7 @@ export default function WeddingCard({ guestName }) {
         </defs>
       </svg>
 
-      {/* ── Foto fullscreen: Ken Burns lento + parallax inclinazione ──── */}
+      {/* ── Foto fullscreen: schiarita + Ken Burns + parallax ────────── */}
       <motion.div
         className="absolute inset-0"
         style={{ perspective: 1400 }}
@@ -70,10 +70,7 @@ export default function WeddingCard({ guestName }) {
       >
         <motion.div
           className="absolute"
-          style={{
-            inset: '-6%',
-            filter: 'url(#oil-paint)',
-          }}
+          style={{ inset: '-6%', filter: 'url(#oil-paint)' }}
           animate={{
             scale: [1.00, 1.10, 1.04],
             x:     ['0%',  '2.5%', '-1.5%'],
@@ -89,15 +86,15 @@ export default function WeddingCard({ guestName }) {
             alt="Matteo e Clio"
             fill
             className="object-cover"
-            style={{ filter: 'brightness(0.88) contrast(1.08)' }}
+            style={{ filter: 'brightness(1.18) contrast(0.95) saturate(0.90)' }}
             priority
           />
         </motion.div>
       </motion.div>
 
-      {/* Texture tela da dipinto sovrapposta */}
+      {/* Texture tela */}
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
-        pointerEvents: 'none', opacity: 0.045 }}>
+        pointerEvents: 'none', opacity: 0.03 }}>
         <filter id="canvas-weave">
           <feTurbulence type="fractalNoise" baseFrequency="0.70 0.70"
             numOctaves="3" seed="11" stitchTiles="stitch" />
@@ -106,116 +103,117 @@ export default function WeddingCard({ guestName }) {
         <rect width="100%" height="100%" filter="url(#canvas-weave)" />
       </svg>
 
-      {/* Vignetta scura sui bordi */}
+      {/* Vignetta leggera ai bordi */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'radial-gradient(ellipse 80% 75% at 50% 38%, transparent 28%, rgba(8,4,2,0.68) 100%)',
+        background: 'radial-gradient(ellipse 85% 80% at 50% 38%, transparent 35%, rgba(8,4,2,0.28) 100%)',
       }} />
 
-      {/* Gradiente basso per leggibilità testo */}
+      {/* Gradiente basso — ridotto per leggibilità testo nero */}
       <div className="absolute inset-0 pointer-events-none" style={{
-        background: 'linear-gradient(to bottom, transparent 28%, rgba(6,3,1,0.88) 100%)',
+        background: 'linear-gradient(to bottom, transparent 45%, rgba(255,255,255,0.32) 100%)',
       }} />
 
-      {/* ── Testo sovrapposto ─────────────────────────────────────────── */}
+      {/* ── Testo ────────────────────────────────────────────────────── */}
       <motion.div
         className="relative z-10 w-full text-center"
-        style={{ padding: '2rem 1.5rem 28vh' }}
+        style={{ padding: '2rem 1.5rem 38vh' }}
         initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
       >
         <p style={{
           fontFamily: "'Lato', sans-serif",
-          fontSize: '0.62rem', letterSpacing: '0.32em',
-          color: 'rgba(130,200,100,0.70)',
-          marginBottom: '0.8rem', textTransform: 'uppercase',
+          fontSize: '0.60rem', letterSpacing: '0.32em',
+          color: 'rgba(0,0,0,0.55)',
+          marginBottom: '0.6rem', textTransform: 'uppercase',
         }}>
           Il matrimonio di
         </p>
 
+        {/* Nome sposo — sfalsato a sinistra */}
         <h1 style={{
-          fontFamily: "'Alex Brush', cursive",
-          fontSize: 'clamp(3.2rem, 12vw, 5.6rem)',
-          fontWeight: 400, lineHeight: 1.10,
-          color: '#F6F0E2',
-          textShadow: '0 3px 40px rgba(0,0,0,0.55)',
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(4.8rem, 18vw, 9rem)',
+          fontWeight: 400, lineHeight: 1.05,
+          color: '#0A0A0A',
+          textShadow: '0 1px 8px rgba(255,255,255,0.25)',
           margin: 0,
+          display: 'block',
+          transform: 'translateX(-10%)',
         }}>
           {WEDDING.groomName}
         </h1>
 
-        <p style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 'clamp(1.1rem, 3.5vw, 1.5rem)',
-          color: 'rgba(100,180,70,0.85)', letterSpacing: '0.18em',
-          margin: '0.1rem 0',
-        }}>
-          &amp;
-        </p>
-
+        {/* Nome sposa — sfalsata a destra, ravvicinata */}
         <h1 style={{
-          fontFamily: "'Alex Brush', cursive",
-          fontSize: 'clamp(3.2rem, 12vw, 5.6rem)',
-          fontWeight: 400, lineHeight: 1.10,
-          color: '#F6F0E2',
-          textShadow: '0 3px 40px rgba(0,0,0,0.55)',
-          marginBottom: '1.2rem',
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(4.8rem, 18vw, 9rem)',
+          fontWeight: 400, lineHeight: 1.05,
+          color: '#0A0A0A',
+          textShadow: '0 1px 8px rgba(255,255,255,0.25)',
+          marginTop: '-0.6rem',
+          marginBottom: '1.0rem',
+          display: 'block',
+          transform: 'translateX(10%)',
         }}>
           {WEDDING.brideName}
         </h1>
 
         <p style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 'clamp(0.82rem, 2.5vw, 1.05rem)',
-          fontStyle: 'italic',
-          color: 'rgba(160,215,140,0.82)',
-          marginBottom: '1.4rem',
-          letterSpacing: '0.04em',
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(1.15rem, 3.5vw, 1.6rem)',
+          color: 'rgba(0,0,0,0.68)',
+          marginBottom: '1.2rem',
+          letterSpacing: '0.02em',
         }}>
           annunciano il loro matrimonio
         </p>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '1.2rem' }}>
-          <div style={{ height: 1, width: 52, background: 'rgba(74,140,60,0.45)' }} />
-          <svg width="8" height="8" viewBox="0 0 10 10">
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '1.0rem' }}>
+          <div style={{ height: 1, width: 48, background: 'rgba(0,0,0,0.28)' }} />
+          <svg width="7" height="7" viewBox="0 0 10 10">
             <path d="M5 0L6.2 3.8L10 5L6.2 6.2L5 10L3.8 6.2L0 5L3.8 3.8Z"
-              fill="#5FA050" fillOpacity="0.70" />
+              fill="#333" fillOpacity="0.55" />
           </svg>
-          <div style={{ height: 1, width: 52, background: 'rgba(74,140,60,0.45)' }} />
+          <div style={{ height: 1, width: 48, background: 'rgba(0,0,0,0.28)' }} />
         </div>
 
         <p style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: '0.90rem', fontStyle: 'italic',
-          color: 'rgba(160,215,140,0.80)', marginBottom: '0.3rem',
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(1.1rem, 3.5vw, 1.55rem)',
+          color: 'rgba(0,0,0,0.72)',
+          marginBottom: '0.2rem',
         }}>
           {formatDate(WEDDING.date)}
         </p>
         <p style={{
           fontFamily: "'Lato', sans-serif",
-          fontSize: '0.62rem', letterSpacing: '0.26em',
-          color: 'rgba(100,180,70,0.55)',
-          marginBottom: '0.5rem',
+          fontSize: '0.60rem', letterSpacing: '0.26em',
+          color: 'rgba(0,0,0,0.50)',
+          marginBottom: '0.4rem',
+          textTransform: 'uppercase',
         }}>
-          ORE {WEDDING.time}
+          Ore {WEDDING.time}
         </p>
         <p style={{
-          fontFamily: "'Alex Brush', cursive",
-          fontSize: 'clamp(1.4rem, 5vw, 2rem)',
-          color: 'rgba(200,235,185,0.80)',
-          letterSpacing: '0.04em',
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(1.4rem, 5vw, 2.2rem)',
+          color: 'rgba(0,0,0,0.72)',
+          letterSpacing: '0.02em',
         }}>
           {WEDDING.receptionLocation.name}
         </p>
 
         {guestName && (
           <p style={{
-            fontFamily: "'Playfair Display', Georgia, serif",
-            fontSize: '0.82rem', fontStyle: 'italic', lineHeight: 1.75,
-            color: 'rgba(160,215,140,0.65)', marginTop: '2rem',
+            fontFamily: "'Allura', cursive",
+            fontSize: 'clamp(1.1rem, 3.2vw, 1.5rem)',
+            lineHeight: 1.75,
+            color: 'rgba(0,0,0,0.58)',
+            marginTop: '1.6rem',
           }}>
             Con affetto vi invitiamo,<br />
-            <span style={{ color: 'rgba(100,180,70,0.60)' }}>{guestName}</span>
+            <span style={{ color: 'rgba(0,0,0,0.65)' }}>{guestName}</span>
           </p>
         )}
       </motion.div>
@@ -230,17 +228,18 @@ export default function WeddingCard({ guestName }) {
       >
         <span style={{
           fontFamily: "'Lato', sans-serif",
-          fontSize: '0.56rem', letterSpacing: '0.32em',
-          color: 'rgba(100,180,70,0.45)',
+          fontSize: '0.54rem', letterSpacing: '0.32em',
+          color: 'rgba(0,0,0,0.38)',
+          textTransform: 'uppercase',
         }}>
-          SCORRI
+          Scorri
         </span>
         <motion.svg width="12" height="8" viewBox="0 0 14 9" fill="none"
           animate={{ y: [0, 4, 0] }}
           transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <path d="M1 1L7 7L13 1" stroke="#5FA050" strokeWidth="1.2"
-            strokeLinecap="round" strokeOpacity="0.45" />
+          <path d="M1 1L7 7L13 1" stroke="#333" strokeWidth="1.2"
+            strokeLinecap="round" strokeOpacity="0.40" />
         </motion.svg>
       </motion.div>
     </section>

@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-gold:    #2E5230;
-  --color-gold-light: #4A7B50;
+  --color-gold:    #8B9640;
+  --color-gold-light: #A8B860;
   --color-cream:   #FAF7F2;
   --color-parchment: #F3EDE3;
   --color-rose:    #C49A9A;
@@ -23,14 +23,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Playfair utility */
+/* Allura script: usata per tutto il testo non in maiuscolo */
 .font-playfair {
-  font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  font-family: 'Allura', cursive;
 }
 
-/* Alex Brush utility */
-.font-alex-brush {
-  font-family: 'Alex Brush', cursive;
+.font-allura {
+  font-family: 'Allura', cursive;
 }
 
 /* Testo elegante uppercase tracking */
@@ -40,11 +39,11 @@ body {
   font-weight: 400;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #2E5230;
+  color: #8B9640;
 }
 
 /* Scrollbar sottile */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #FAF7F2; }
-::-webkit-scrollbar-thumb { background: rgba(46,82,48,0.25); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(46,82,48,0.45); }
+::-webkit-scrollbar-thumb { background: rgba(139,150,64,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(139,150,64,0.45); }

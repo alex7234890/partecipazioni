@@ -5,14 +5,14 @@ export const WEDDING = {
   date: "2026-06-01",
   time: "17:00",
   ceremonyLocation: {
-    name: "Chiesa di Santa Maria delle Grazie",
-    address: "Piazza Santa Maria delle Grazie, 1, Milano MI",
-    mapsUrl: "https://maps.google.com/?q=Piazza+Santa+Maria+delle+Grazie+1+Milano",
+    name: "Villa Dal Pozzo",
+    address: "Via Berte e Scacciavolpe, 5, 57014 Collesalvetti LI",
+    mapsUrl: "https://maps.google.com/?q=Villa+Dal+Pozzo%2C+Via+Berte+e+Scacciavolpe+5%2C+57014+Collesalvetti+LI",
   },
   receptionLocation: {
     name: "Villa Dal Pozzo",
-    address: "Strada Statale del Sempione, 5, 28832 Belgirate VB",
-    mapsUrl: "https://maps.google.com/?q=Villa+Claudia+dal+Pozzo%2C+Strada+Statale+del+Sempione+5%2C+28832+Belgirate+VB",
+    address: "Via Berte e Scacciavolpe, 5, 57014 Collesalvetti LI",
+    mapsUrl: "https://maps.google.com/?q=Villa+Dal+Pozzo%2C+Via+Berte+e+Scacciavolpe+5%2C+57014+Collesalvetti+LI",
   },
   giftListUrl: "https://matteoeclio.amoore.it",
   timeline: [
