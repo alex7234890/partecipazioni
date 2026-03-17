@@ -60,6 +60,17 @@ export default function RSVPForm({ guest }) {
         Conferma la presenza
       </motion.h2>
 
+      <motion.p
+        className="font-playfair text-center"
+        style={{ fontSize: 'clamp(1.0rem, 3vw, 1.3rem)', color: 'rgba(44,36,32,0.52)', marginBottom: '2.5rem' }}
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ delay: 0.2 }}
+      >
+        Vi chiediamo gentilmente di comunicarci<br/>la vostra presenza entro il 30 aprile
+      </motion.p>
+
       <AnimatePresence mode="wait">
         {submitted ? (
           <motion.div
@@ -73,7 +84,7 @@ export default function RSVPForm({ guest }) {
             <div className="flex justify-center mb-6">
               <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
                 <path d="M16 2 L19 11 L28 11 L21 17 L24 26 L16 20 L8 26 L11 17 L4 11 L13 11 Z"
-                  fill="#2E5230" fillOpacity="0.35"/>
+                  fill="#8B9640" fillOpacity="0.35"/>
               </svg>
             </div>
             <h3 className="font-playfair text-charcoal mb-4" style={{ fontSize: '1.5rem', fontWeight: 400 }}>
@@ -97,7 +108,7 @@ export default function RSVPForm({ guest }) {
               <p className="font-playfair text-charcoal" style={{ fontSize: '1.05rem', fontWeight: 400 }}>
                 {guest?.name || '—'}
               </p>
-              <div style={{ height: 1, background: 'rgba(46,82,48,0.20)', marginTop: 8 }}/>
+              <div style={{ height: 1, background: 'rgba(139,150,64,0.20)', marginTop: 8 }}/>
             </div>
 
             {/* Presenza */}
@@ -110,7 +121,7 @@ export default function RSVPForm({ guest }) {
                     style={{
                       display: 'flex', alignItems: 'center', gap: 14,
                       padding: '14px 0',
-                      borderBottom: i < STATUS_OPTIONS.length - 1 ? '1px solid rgba(46,82,48,0.12)' : 'none',
+                      borderBottom: i < STATUS_OPTIONS.length - 1 ? '1px solid rgba(139,150,64,0.12)' : 'none',
                       cursor: 'pointer',
                     }}
                   >
@@ -119,14 +130,14 @@ export default function RSVPForm({ guest }) {
                       onClick={() => setStatus(opt.value)}
                       style={{
                         width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
-                        border: `1px solid ${status === opt.value ? '#2E5230' : 'rgba(44,36,32,0.2)'}`,
+                        border: `1px solid ${status === opt.value ? '#8B9640' : 'rgba(44,36,32,0.2)'}`,
                         background: '#FAF7F2',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         transition: 'border-color 0.2s',
                       }}
                     >
                       {status === opt.value && (
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#2E5230' }}/>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#8B9640' }}/>
                       )}
                     </div>
                     <span
@@ -157,7 +168,7 @@ export default function RSVPForm({ guest }) {
                 style={{
                   width: '100%', resize: 'none', outline: 'none',
                   background: 'transparent',
-                  border: 'none', borderBottom: '1px solid rgba(46,82,48,0.20)',
+                  border: 'none', borderBottom: '1px solid rgba(139,150,64,0.20)',
                   padding: '8px 0', fontSize: '0.85rem',
                   color: '#2C2420', fontWeight: 300, letterSpacing: '0.02em',
                   fontFamily: "'Lato', sans-serif",
@@ -179,7 +190,7 @@ export default function RSVPForm({ guest }) {
                 style={{
                   width: '100%', resize: 'none', outline: 'none',
                   background: 'transparent',
-                  border: 'none', borderBottom: '1px solid rgba(46,82,48,0.20)',
+                  border: 'none', borderBottom: '1px solid rgba(139,150,64,0.20)',
                   padding: '8px 0', fontSize: '0.85rem',
                   color: '#2C2420', fontWeight: 300, letterSpacing: '0.02em',
                   fontFamily: "'Lato', sans-serif",
@@ -199,8 +210,8 @@ export default function RSVPForm({ guest }) {
               style={{
                 width: '100%',
                 background: 'transparent',
-                border: '1px solid rgba(46,82,48,0.50)',
-                color: '#2E5230',
+                border: '1px solid rgba(139,150,64,0.50)',
+                color: '#8B9640',
                 fontFamily: "'Lato', sans-serif",
                 fontSize: '0.72rem',
                 letterSpacing: '0.22em',
@@ -210,8 +221,8 @@ export default function RSVPForm({ guest }) {
                 opacity: loading ? 0.6 : 1,
                 transition: 'background 0.25s, color 0.25s',
               }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#2E5230'; e.currentTarget.style.color = '#fff' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#2E5230' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#8B9640'; e.currentTarget.style.color = '#fff' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#8B9640' }}
             >
               {loading ? 'Invio in corso…' : 'Invia conferma'}
             </button>
