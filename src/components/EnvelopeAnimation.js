@@ -15,8 +15,8 @@ function getOrCreateAudio() {
 }
 
 export default function EnvelopeAnimation({ onOpen }) {
-  const [phase, setPhase]             = useState('idle')
-  const [coverVisible, setCoverVisible] = useState(true)
+  const [phase, setPhase]           = useState('idle')
+  const [videoReady, setVideoReady] = useState(false)
   const videoRef  = useRef(null)
   const timerRef  = useRef(null)
   const playedRef = useRef(false)
@@ -25,18 +25,14 @@ export default function EnvelopeAnimation({ onOpen }) {
     if (phase !== 'idle') return
     setPhase('playing')
 
-    // Rimuove il cover (con fade) e fa partire il video
-    setCoverVisible(false)
     if (videoRef.current) videoRef.current.play()
 
-    // Avvia musica di sottofondo
     if (!playedRef.current) {
       playedRef.current = true
       const audio = getOrCreateAudio()
       if (audio) audio.play().catch(() => {})
     }
 
-    // Dopo 3s: dissolvi e apri la partecipazione
     timerRef.current = setTimeout(() => {
       setPhase('done')
       setTimeout(() => onOpen?.(), 650)
@@ -54,42 +50,29 @@ export default function EnvelopeAnimation({ onOpen }) {
       transition={{ duration: 0.65 }}
       onClick={handleTap}
     >
-      {/* ── Video busta (muto, il suono è music.mp3) ─────────────────── */}
+      {/* Video — opacity 0 finché non è pronto (onCanPlay).
+          Su Android/desktop preload funziona e onCanPlay scatta subito.
+          Su iOS il background #EDE6D9 mostra attraverso finché l'utente tocca
+          (il flash bianco alla apertura link è risolto dall'html background). */}
       <video
         ref={videoRef}
         src="/envelope-video.mp4"
         playsInline
         muted
         preload="auto"
+        onCanPlay={() => setVideoReady(true)}
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
           objectFit: 'cover',
           transform: 'scale(1.22)',
           transformOrigin: 'center center',
-          zIndex: 1,
-        }}
-      />
-
-      {/* ── Cover iOS ────────────────────────────────────────────────────
-          Su iOS il tag <video> mostra un placeholder bianco nativo che
-          ignora opacity/visibility CSS. Questo div lo copre finché
-          l'utente non tocca, poi sparisce con un fade di 0.4s.        ── */}
-      <div
-        style={{
-          position: 'absolute', inset: 0,
-          zIndex: 2,
-          background: '#EDE6D9',
-          backgroundImage: "url('/envelope-bg.png'), url('/envelope-bg.jpg')",
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          opacity: coverVisible ? 1 : 0,
+          opacity: videoReady ? 1 : 0,
           transition: 'opacity 0.4s ease',
-          pointerEvents: 'none',
         }}
       />
 
-      {/* ── Hint "tocca per aprire" ───────────────────────────────────── */}
+      {/* Hint */}
       <motion.div
         style={{
           position: 'absolute', bottom: '8%', left: '50%',
