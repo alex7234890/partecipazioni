@@ -3,14 +3,36 @@
 import { useState, useRef } from 'react'
 import { motion } from 'framer-motion'
 
+function getOrCreateAudio() {
+  if (typeof window === 'undefined') return null
+  if (!window._weddingAudio) {
+    const a = new Audio('/music.mp3')
+    a.loop   = true
+    a.volume = 0.75
+    window._weddingAudio = a
+  }
+  return window._weddingAudio
+}
+
 export default function EnvelopeAnimation({ onOpen }) {
-  const [phase, setPhase] = useState('idle') // idle | playing | done
-  const videoRef   = useRef(null)
-  const timerRef   = useRef(null)
+  const [phase, setPhase]           = useState('idle') // idle | playing | done
+  const [videoReady, setVideoReady] = useState(false)
+  const videoRef  = useRef(null)
+  const timerRef  = useRef(null)
+  const playedRef = useRef(false)
 
   const handleTap = () => {
     if (phase !== 'idle') return
     setPhase('playing')
+
+    // Avvia musica di sottofondo (solo al primo tocco)
+    if (!playedRef.current) {
+      playedRef.current = true
+      const audio = getOrCreateAudio()
+      if (audio) audio.play().catch(() => {})
+    }
+
+    // Avvia video (muto — l'audio è gestito da music.mp3)
     if (videoRef.current) videoRef.current.play()
 
     // Dopo 3s dal tocco: dissolvi e apri la partecipazione
@@ -31,26 +53,36 @@ export default function EnvelopeAnimation({ onOpen }) {
       transition={{ duration: 0.65 }}
       onClick={handleTap}
     >
-      {/* ── Video busta ─────────────────────────────────────────────────
-          Metti /public/envelope-video.mp4 con il video della busta.
-          Il video parte fermo; al tocco si avvia.
-          scale(1.40) zooma sul centro dove si trova il sigillo.      ── */}
+      {/* ── Sfondo parchment — visibile su iOS prima che il video si carichi ── */}
+      <div style={{
+        position: 'absolute', inset: 0,
+        background: '#EDE6D9',
+        backgroundImage: "url('/envelope-bg.png'), url('/envelope-bg.jpg')",
+        backgroundSize: 'cover', backgroundPosition: 'center',
+        zIndex: 0,
+      }} />
+
+      {/* ── Video busta — opacità 0 finché iOS non ha il primo frame ────── */}
       <video
         ref={videoRef}
         src="/envelope-video.mp4"
         playsInline
         muted
         preload="auto"
+        onCanPlay={() => setVideoReady(true)}
         style={{
           position: 'absolute', inset: 0,
           width: '100%', height: '100%',
           objectFit: 'cover',
           transform: 'scale(1.22)',
           transformOrigin: 'center center',
+          zIndex: 1,
+          opacity: videoReady ? 1 : 0,
+          transition: 'opacity 0.4s ease',
         }}
       />
 
-      {/* ── Hint "tocca per aprire" — scompare al tocco ─────────────── */}
+      {/* ── Hint "tocca per aprire" — scompare al tocco ─────────────────── */}
       <motion.div
         style={{
           position: 'absolute', bottom: '8%', left: '50%',

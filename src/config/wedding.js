@@ -3,7 +3,7 @@ export const WEDDING = {
   brideName: "Clio",
   fullNames: "Matteo Filippelli & Clio Righetti",
   date: "2026-06-01",
-  time: "17:00",
+  time: "16:30",
   ceremonyLocation: {
     name: "Villa Dal Pozzo",
     address: "Via Berte e Scacciavolpe, 5, 57014 Collesalvetti LI",
