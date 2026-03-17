@@ -41,14 +41,6 @@ export default function RSVPForm({ guest }) {
     <section className="py-24 px-4">
       <PetalRain active={showPetals} count={50} />
 
-      <motion.p
-        className="label-elegant text-center mb-4"
-        initial={{ opacity: 0 }}
-        whileInView={{ opacity: 1 }}
-        viewport={{ once: true }}
-      >
-        Fateci sapere
-      </motion.p>
       <motion.h2
         className="font-playfair text-charcoal text-center mb-16"
         style={{ fontSize: 'clamp(1.6rem, 5vw, 2.4rem)', fontWeight: 400 }}
