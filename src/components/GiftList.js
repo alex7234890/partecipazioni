@@ -20,7 +20,7 @@ function CopyField({ label, value }) {
     <div style={{
       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
       padding: '12px 0',
-      borderBottom: '1px solid rgba(184,150,62,0.12)',
+      borderBottom: '1px solid rgba(46,82,48,0.12)',
     }}>
       <div>
         <p className="label-elegant mb-1">{label}</p>
@@ -30,8 +30,8 @@ function CopyField({ label, value }) {
         onClick={handleCopy}
         style={{
           background: 'transparent',
-          border: `1px solid ${copied ? 'rgba(80,160,80,0.5)' : 'rgba(184,150,62,0.35)'}`,
-          color: copied ? '#4a9a5a' : '#B8963E',
+          border: `1px solid ${copied ? 'rgba(80,160,80,0.5)' : 'rgba(46,82,48,0.35)'}`,
+          color: copied ? '#4a9a5a' : '#2E5230',
           fontSize: '0.65rem', letterSpacing: '0.18em', textTransform: 'uppercase',
           padding: '6px 14px', cursor: 'pointer',
           transition: 'all 0.2s', flexShrink: 0,
@@ -84,13 +84,13 @@ export default function GiftList() {
       >
         <div style={{
           background: '#fff',
-          border: '1px solid rgba(184,150,62,0.18)',
+          border: '1px solid rgba(46,82,48,0.18)',
           padding: '2rem',
           position: 'relative',
         }}>
           {/* Angolini */}
-          <div style={{ position: 'absolute', top: 8, left: 8, width: 14, height: 14, borderTop: '1px solid rgba(184,150,62,0.4)', borderLeft: '1px solid rgba(184,150,62,0.4)' }}/>
-          <div style={{ position: 'absolute', bottom: 8, right: 8, width: 14, height: 14, borderBottom: '1px solid rgba(184,150,62,0.4)', borderRight: '1px solid rgba(184,150,62,0.4)' }}/>
+          <div style={{ position: 'absolute', top: 8, left: 8, width: 14, height: 14, borderTop: '1px solid rgba(46,82,48,0.40)', borderLeft: '1px solid rgba(46,82,48,0.40)' }}/>
+          <div style={{ position: 'absolute', bottom: 8, right: 8, width: 14, height: 14, borderBottom: '1px solid rgba(46,82,48,0.40)', borderRight: '1px solid rgba(46,82,48,0.40)' }}/>
 
           <p className="label-elegant mb-5">Accedi con queste credenziali</p>
           <CopyField label="Utente" value={GIFT_CREDENTIALS.user} />
@@ -104,14 +104,14 @@ export default function GiftList() {
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
               marginTop: '1.75rem', width: '100%',
               background: 'transparent',
-              border: '1px solid rgba(184,150,62,0.5)',
-              color: '#B8963E', textDecoration: 'none',
+              border: '1px solid rgba(46,82,48,0.50)',
+              color: '#2E5230', textDecoration: 'none',
               fontSize: '0.7rem', letterSpacing: '0.2em', textTransform: 'uppercase',
               padding: '13px 0',
               transition: 'all 0.25s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = '#B8963E'; e.currentTarget.style.color = '#fff' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#B8963E' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#2E5230'; e.currentTarget.style.color = '#fff' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#2E5230' }}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
               <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6"/>

@@ -12,7 +12,7 @@ function LocationItem({ location, label, delay }) {
       transition={{ delay, duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
       style={{
         background: '#fff',
-        border: '1px solid rgba(184,150,62,0.18)',
+        border: '1px solid rgba(46,82,48,0.18)',
         padding: '2rem',
         position: 'relative',
       }}
@@ -21,14 +21,14 @@ function LocationItem({ location, label, delay }) {
       <div style={{
         position: 'absolute', top: 10, left: 10,
         width: 16, height: 16,
-        borderTop: '1px solid rgba(184,150,62,0.4)',
-        borderLeft: '1px solid rgba(184,150,62,0.4)',
+        borderTop: '1px solid rgba(46,82,48,0.40)',
+        borderLeft: '1px solid rgba(46,82,48,0.40)',
       }}/>
       <div style={{
         position: 'absolute', bottom: 10, right: 10,
         width: 16, height: 16,
-        borderBottom: '1px solid rgba(184,150,62,0.4)',
-        borderRight: '1px solid rgba(184,150,62,0.4)',
+        borderBottom: '1px solid rgba(46,82,48,0.40)',
+        borderRight: '1px solid rgba(46,82,48,0.40)',
       }}/>
 
       <p className="label-elegant mb-3">{label}</p>
@@ -45,8 +45,8 @@ function LocationItem({ location, label, delay }) {
         style={{
           display: 'inline-flex', alignItems: 'center', gap: 8,
           fontSize: '0.72rem', letterSpacing: '0.18em', textTransform: 'uppercase',
-          color: '#B8963E', textDecoration: 'none',
-          borderBottom: '1px solid rgba(184,150,62,0.35)',
+          color: '#2E5230', textDecoration: 'none',
+          borderBottom: '1px solid rgba(46,82,48,0.35)',
           paddingBottom: 2,
           transition: 'opacity 0.2s',
         }}

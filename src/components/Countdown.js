@@ -36,7 +36,7 @@ function Unit({ value, label }) {
           {pad(value)}
         </motion.span>
       </AnimatePresence>
-      <span className="label-elegant mt-2" style={{ color: 'rgba(184,150,62,0.7)' }}>{label}</span>
+      <span className="label-elegant mt-2" style={{ color: 'rgba(46,82,48,0.7)' }}>{label}</span>
     </div>
   )
 }

@@ -42,10 +42,7 @@ export default function WeddingCard({ guestName }) {
   return (
     <section className="relative min-h-screen overflow-hidden flex items-end">
 
-      {/* ── SVG: filtro olio pittura ─────────────────────────────────────
-          feTurbulence + feDisplacementMap  → pennellate / brush strokes
-          feColorMatrix + feComponentTransfer → calore cromatico da dipinto
-      ────────────────────────────────────────────────────────────────── */}
+      {/* ── SVG: filtro olio pittura ────────────────────────────────────── */}
       <svg style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden' }}>
         <defs>
           <filter id="oil-paint" x="-5%" y="-5%" width="110%" height="110%"
@@ -109,7 +106,7 @@ export default function WeddingCard({ guestName }) {
         <rect width="100%" height="100%" filter="url(#canvas-weave)" />
       </svg>
 
-      {/* Vignetta scura sui bordi (tipica dei dipinti) */}
+      {/* Vignetta scura sui bordi */}
       <div className="absolute inset-0 pointer-events-none" style={{
         background: 'radial-gradient(ellipse 80% 75% at 50% 38%, transparent 28%, rgba(8,4,2,0.68) 100%)',
       }} />
@@ -122,7 +119,7 @@ export default function WeddingCard({ guestName }) {
       {/* ── Testo sovrapposto ─────────────────────────────────────────── */}
       <motion.div
         className="relative z-10 w-full text-center"
-        style={{ padding: '2rem 1.5rem 5rem' }}
+        style={{ padding: '2rem 1.5rem 28vh' }}
         initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
@@ -130,15 +127,15 @@ export default function WeddingCard({ guestName }) {
         <p style={{
           fontFamily: "'Lato', sans-serif",
           fontSize: '0.62rem', letterSpacing: '0.32em',
-          color: 'rgba(220,193,135,0.65)',
-          marginBottom: '1.1rem', textTransform: 'uppercase',
+          color: 'rgba(130,200,100,0.70)',
+          marginBottom: '0.8rem', textTransform: 'uppercase',
         }}>
           Il matrimonio di
         </p>
 
         <h1 style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 'clamp(2.6rem, 10vw, 4.4rem)',
+          fontFamily: "'Alex Brush', cursive",
+          fontSize: 'clamp(3.2rem, 12vw, 5.6rem)',
           fontWeight: 400, lineHeight: 1.10,
           color: '#F6F0E2',
           textShadow: '0 3px 40px rgba(0,0,0,0.55)',
@@ -150,55 +147,75 @@ export default function WeddingCard({ guestName }) {
         <p style={{
           fontFamily: "'Playfair Display', Georgia, serif",
           fontSize: 'clamp(1.1rem, 3.5vw, 1.5rem)',
-          color: 'rgba(212,178,96,0.80)', letterSpacing: '0.18em',
-          margin: '0.2rem 0',
+          color: 'rgba(100,180,70,0.85)', letterSpacing: '0.18em',
+          margin: '0.1rem 0',
         }}>
           &amp;
         </p>
 
         <h1 style={{
-          fontFamily: "'Playfair Display', Georgia, serif",
-          fontSize: 'clamp(2.6rem, 10vw, 4.4rem)',
+          fontFamily: "'Alex Brush', cursive",
+          fontSize: 'clamp(3.2rem, 12vw, 5.6rem)',
           fontWeight: 400, lineHeight: 1.10,
           color: '#F6F0E2',
           textShadow: '0 3px 40px rgba(0,0,0,0.55)',
-          marginBottom: '1.8rem',
+          marginBottom: '1.2rem',
         }}>
           {WEDDING.brideName}
         </h1>
 
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '1.4rem' }}>
-          <div style={{ height: 1, width: 52, background: 'rgba(212,178,96,0.40)' }} />
+        <p style={{
+          fontFamily: "'Playfair Display', Georgia, serif",
+          fontSize: 'clamp(0.82rem, 2.5vw, 1.05rem)',
+          fontStyle: 'italic',
+          color: 'rgba(160,215,140,0.82)',
+          marginBottom: '1.4rem',
+          letterSpacing: '0.04em',
+        }}>
+          annunciano il loro matrimonio
+        </p>
+
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: '1.2rem' }}>
+          <div style={{ height: 1, width: 52, background: 'rgba(74,140,60,0.45)' }} />
           <svg width="8" height="8" viewBox="0 0 10 10">
             <path d="M5 0L6.2 3.8L10 5L6.2 6.2L5 10L3.8 6.2L0 5L3.8 3.8Z"
-              fill="#D4B260" fillOpacity="0.65" />
+              fill="#5FA050" fillOpacity="0.70" />
           </svg>
-          <div style={{ height: 1, width: 52, background: 'rgba(212,178,96,0.40)' }} />
+          <div style={{ height: 1, width: 52, background: 'rgba(74,140,60,0.45)' }} />
         </div>
 
         <p style={{
           fontFamily: "'Playfair Display', Georgia, serif",
           fontSize: '0.90rem', fontStyle: 'italic',
-          color: 'rgba(238,222,182,0.72)', marginBottom: '0.4rem',
+          color: 'rgba(160,215,140,0.80)', marginBottom: '0.3rem',
         }}>
           {formatDate(WEDDING.date)}
         </p>
         <p style={{
           fontFamily: "'Lato', sans-serif",
           fontSize: '0.62rem', letterSpacing: '0.26em',
-          color: 'rgba(212,178,96,0.48)',
+          color: 'rgba(100,180,70,0.55)',
+          marginBottom: '0.5rem',
         }}>
           ORE {WEDDING.time}
+        </p>
+        <p style={{
+          fontFamily: "'Alex Brush', cursive",
+          fontSize: 'clamp(1.4rem, 5vw, 2rem)',
+          color: 'rgba(200,235,185,0.80)',
+          letterSpacing: '0.04em',
+        }}>
+          {WEDDING.receptionLocation.name}
         </p>
 
         {guestName && (
           <p style={{
             fontFamily: "'Playfair Display', Georgia, serif",
             fontSize: '0.82rem', fontStyle: 'italic', lineHeight: 1.75,
-            color: 'rgba(238,222,182,0.60)', marginTop: '2rem',
+            color: 'rgba(160,215,140,0.65)', marginTop: '2rem',
           }}>
             Con affetto vi invitiamo,<br />
-            <span style={{ color: 'rgba(212,178,96,0.55)' }}>{guestName}</span>
+            <span style={{ color: 'rgba(100,180,70,0.60)' }}>{guestName}</span>
           </p>
         )}
       </motion.div>
@@ -214,7 +231,7 @@ export default function WeddingCard({ guestName }) {
         <span style={{
           fontFamily: "'Lato', sans-serif",
           fontSize: '0.56rem', letterSpacing: '0.32em',
-          color: 'rgba(212,178,96,0.40)',
+          color: 'rgba(100,180,70,0.45)',
         }}>
           SCORRI
         </span>
@@ -222,8 +239,8 @@ export default function WeddingCard({ guestName }) {
           animate={{ y: [0, 4, 0] }}
           transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <path d="M1 1L7 7L13 1" stroke="#D4B260" strokeWidth="1.2"
-            strokeLinecap="round" strokeOpacity="0.42" />
+          <path d="M1 1L7 7L13 1" stroke="#5FA050" strokeWidth="1.2"
+            strokeLinecap="round" strokeOpacity="0.45" />
         </motion.svg>
       </motion.div>
     </section>

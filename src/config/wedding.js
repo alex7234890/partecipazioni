@@ -2,7 +2,7 @@ export const WEDDING = {
   groomName: "Matteo",
   brideName: "Clio",
   fullNames: "Matteo Filippelli & Clio Righetti",
-  date: "2026-09-20",
+  date: "2026-06-01",
   time: "17:00",
   ceremonyLocation: {
     name: "Chiesa di Santa Maria delle Grazie",
@@ -10,9 +10,9 @@ export const WEDDING = {
     mapsUrl: "https://maps.google.com/?q=Piazza+Santa+Maria+delle+Grazie+1+Milano",
   },
   receptionLocation: {
-    name: "Villa Borromeo d'Adda",
-    address: "Via Borromeo, 1, Arcore MB",
-    mapsUrl: "https://maps.google.com/?q=Via+Borromeo+1+Arcore+MB",
+    name: "Villa Dal Pozzo",
+    address: "Strada Statale del Sempione, 5, 28832 Belgirate VB",
+    mapsUrl: "https://maps.google.com/?q=Villa+Claudia+dal+Pozzo%2C+Strada+Statale+del+Sempione+5%2C+28832+Belgirate+VB",
   },
   giftListUrl: "https://matteoeclio.amoore.it",
   timeline: [
