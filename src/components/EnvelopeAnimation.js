@@ -24,10 +24,6 @@ function startAmbientPad() {
   } catch (e) { return null }
 }
 
-/* ── Audio globale indipendente dal lifecycle React ─────────────────────
-   new Audio() non è legato al DOM del componente: quando l'envelope
-   si smonta la musica continua a suonare fino alla chiusura della pagina.
-────────────────────────────────────────────────────────────────────── */
 function getOrCreateAudio() {
   if (typeof window === 'undefined') return null
   if (!window._weddingAudio) {
@@ -44,12 +40,10 @@ export default function EnvelopeAnimation({ onOpen }) {
   const padRef    = useRef(null)
   const playedRef = useRef(false)
 
-  /* Tentativo autoplay al mount — il browser lo concede spesso
-     se la pagina è già stata interagita (es. link esterno). */
   useEffect(() => {
     const audio = getOrCreateAudio()
     if (!audio) return
-    audio.play().catch(() => { /* bloccato — scatterà al click */ })
+    audio.play().catch(() => {})
   }, [])
 
   const playMusic = () => {
@@ -81,8 +75,17 @@ export default function EnvelopeAnimation({ onOpen }) {
       whileTap={{ scale: 0.997 }}
       animate={isDone ? { opacity: 0 } : { opacity: 1 }}
       transition={{ duration: 0.65 }}
+      style={{
+        /* ── 5. Envelope body edge depth ── */
+        boxShadow: [
+          'inset 0 0 12px rgba(0,0,0,0.08)',
+          'inset 0 0 3px rgba(0,0,0,0.05)',
+          '0 4px 24px rgba(0,0,0,0.15)',
+          '0 1px 4px rgba(0,0,0,0.10)',
+        ].join(', '),
+      }}
     >
-      {/* Sfondo busta */}
+      {/* ── 1. Background photo ───────────────────────────────────────── */}
       <div style={{
         position: 'absolute', inset: 0,
         background: '#EDE6D9',
@@ -90,7 +93,114 @@ export default function EnvelopeAnimation({ onOpen }) {
         backgroundSize: 'cover', backgroundPosition: 'center',
       }} />
 
-      {/* ── Luce calda dall'interno ──────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════
+          2. FOLD SHADOW OVERLAYS
+          preserveAspectRatio="none" → i vertici (0,0)(100,0)(50,50)…
+          si mappano esattamente agli angoli e al centro dello schermo,
+          indipendentemente dall'aspect ratio del dispositivo.
+
+          Luce simulata da top-left:
+            Top    → più chiaro  (rivolto verso la luce)
+            Left   → leggermente chiaro
+            Right  → leggermente scuro
+            Bottom → più scuro  (in ombra, coperto dagli altri lembi)
+      ═══════════════════════════════════════════════════════════════════ */}
+      <svg
+        viewBox="0 0 100 100" preserveAspectRatio="none"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
+          pointerEvents: 'none', zIndex: 2 }}
+      >
+        <polygon points="0,0 100,0 50,50"   fill="rgba(255,255,255,0.08)" />
+        <polygon points="0,0 50,50 0,100"   fill="rgba(255,255,255,0.05)" />
+        <polygon points="100,0 100,100 50,50" fill="rgba(0,0,0,0.06)" />
+        <polygon points="0,100 100,100 50,50" fill="rgba(0,0,0,0.10)" />
+      </svg>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          3. FOLD CREASE LINES — imperfect bezier + doppia linea embossed
+          Ogni piega = 2 path paralleli a distanza 0.5 unità:
+            • Lato luce  → rgba(255,255,255,0.35)  highlight
+            • Lato ombra → rgba(0,0,0,0.18)         shadow
+          Il risultato simula una piega in rilievo su carta reale.
+
+          Curve quadratiche: il punto di controllo è spostato di ~2 unità
+          rispetto al centro della retta per dare "memoria" alla carta.
+            Top-left   (0,0 → 50,50):  Q 24,22  → bow upward
+            Top-right  (100,0 → 50,50): Q 76,22  → bow upward
+            Bottom-left  (0,100 → 50,50): Q 24,78 → bow downward
+            Bottom-right (100,100→ 50,50): Q 76,78 → bow downward
+      ═══════════════════════════════════════════════════════════════════ */}
+      <svg
+        viewBox="0 0 100 100" preserveAspectRatio="none"
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%',
+          pointerEvents: 'none', zIndex: 3 }}
+      >
+        {/* Top-left fold */}
+        <path d="M 0,0 Q 24,22 50,50"
+          stroke="rgba(255,255,255,0.36)" strokeWidth="0.55" fill="none" />
+        <path d="M 0.5,0 Q 24.5,22.4 50.5,50"
+          stroke="rgba(0,0,0,0.19)" strokeWidth="0.55" fill="none" />
+
+        {/* Top-right fold */}
+        <path d="M 100,0 Q 76,22 50,50"
+          stroke="rgba(255,255,255,0.36)" strokeWidth="0.55" fill="none" />
+        <path d="M 99.5,0 Q 75.5,22.4 49.5,50"
+          stroke="rgba(0,0,0,0.19)" strokeWidth="0.55" fill="none" />
+
+        {/* Bottom-left fold */}
+        <path d="M 0,100 Q 24,78 50,50"
+          stroke="rgba(255,255,255,0.26)" strokeWidth="0.48" fill="none" />
+        <path d="M 0.5,100 Q 24.5,77.6 50.5,50"
+          stroke="rgba(0,0,0,0.16)" strokeWidth="0.48" fill="none" />
+
+        {/* Bottom-right fold */}
+        <path d="M 100,100 Q 76,78 50,50"
+          stroke="rgba(255,255,255,0.22)" strokeWidth="0.48" fill="none" />
+        <path d="M 99.5,100 Q 75.5,77.6 49.5,50"
+          stroke="rgba(0,0,0,0.14)" strokeWidth="0.48" fill="none" />
+
+        {/* Outer border — lieve spessore carta */}
+        <rect x="1.2" y="1.2" width="97.6" height="97.6"
+          fill="none" stroke="rgba(70,40,12,0.13)" strokeWidth="0.6" />
+      </svg>
+
+      {/* ── 4a. Dynamic cast shadow — cresce sotto il lembo mentre si apre
+              Posizionato appena sotto la piega centrale (50% → 75% height).
+              filter blur simula la diffusione dell'ombra su carta.      ── */}
+      <motion.div
+        style={{
+          position: 'absolute', left: 0, right: 0,
+          top: '38%', height: '20%',
+          background: 'linear-gradient(to bottom, rgba(0,0,0,0.18) 0%, transparent 100%)',
+          pointerEvents: 'none', zIndex: 4,
+          filter: 'blur(10px)',
+          transformOrigin: 'top center',
+        }}
+        initial={{ opacity: 0, scaleY: 0.4 }}
+        animate={isOpening
+          ? { opacity: 1, scaleY: 1 }
+          : { opacity: 0, scaleY: 0.4 }
+        }
+        transition={{ delay: 0.20, duration: 1.0, ease: [0.25, 0.46, 0.45, 0.94] }}
+      />
+
+      {/* ── 4b. Seal drop shadow — sul corpo busta, sparisce all'apertura ── */}
+      <motion.div
+        style={{
+          position: 'absolute',
+          left: '50%', top: '50%',
+          transform: 'translate(-50%, -50%) translateY(52px)',
+          width: 118, height: 20,
+          borderRadius: '50%',
+          background: 'rgba(38,18,4,0.28)',
+          filter: 'blur(13px)',
+          pointerEvents: 'none', zIndex: 4,
+        }}
+        animate={{ opacity: isOpening ? 0 : 0.90 }}
+        transition={{ duration: 0.30 }}
+      />
+
+      {/* ── 5. Warm inner glow when open ─────────────────────────────────── */}
       <motion.div
         style={{
           position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5,
@@ -101,18 +211,22 @@ export default function EnvelopeAnimation({ onOpen }) {
         transition={{ delay: 0.14, duration: 1.5 }}
       />
 
-      {/* ══════════════════════════════════════════════════════════════
-          LEMBO SUPERIORE — fisica 3D con spring
-          ─────────────────────────────────────────────────────────────
-          • perspective + perspectiveOrigin sul contenitore
-          • preserve-3d sul lembo → i figli vivono in 3D
-          • spring sottosterzata = overshoot cartaceo realistico
-          • il SIGILLO è figlio del lembo: si stacca con lui in 3D,
-            backfaceVisibility:hidden = sparisce quando il lembo si rovescia
-      ═══════════════════════════════════════════════════════════════ */}
+      {/* ══════════════════════════════════════════════════════════════════
+          6. TOP FLAP — 3D opening animation
+          ──────────────────────────────────────────────────────────────
+          • perspective: 600px → effetto 3D percepibile, fisico
+          • perspectiveOrigin: 50% 0% → punto di fuga al top-center
+          • transformOrigin: top center → cerniera sulla piega superiore
+          • Spring: stiffness 36 / damping 8.5 / mass 1.8
+            ζ ≈ 0.53 → leggermente sottosterzato, overshoot ~14%
+          • rotateX: -160 → il lembo si apre oltre la perpendicolare
+            ma non torna sul retro (backface scompare a ±90°)
+          • Il SIGILLO è figlio del lembo: si stacca con lui in 3D.
+            backfaceVisibility:hidden → sparisce naturalmente
+      ═══════════════════════════════════════════════════════════════════ */}
       <div style={{
         position: 'absolute', inset: 0,
-        perspective: '2800px',
+        perspective: '600px',
         perspectiveOrigin: '50% 0%',
         zIndex: 6, pointerEvents: 'none',
       }}>
@@ -123,19 +237,19 @@ export default function EnvelopeAnimation({ onOpen }) {
             transformStyle: 'preserve-3d',
           }}
           initial={{ rotateX: 0 }}
-          animate={isOpening ? { rotateX: -186 } : { rotateX: 0 }}
+          animate={isOpening ? { rotateX: -160 } : { rotateX: 0 }}
           transition={isOpening
             ? {
                 delay: 0.16,
                 type: 'spring',
-                stiffness: 36,   /* lento, come carta pesante */
-                damping: 8.5,    /* sottosterzato: overshoot + assestamento */
+                stiffness: 36,
+                damping: 8.5,
                 mass: 1.8,
               }
-            : { duration: 0.35 }
+            : { duration: 0.35, ease: 'easeOut' }
           }
         >
-          {/* Fronte del lembo — immagine continua */}
+          {/* ── Fronte del lembo — immagine continua con overlay luce ── */}
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
@@ -143,43 +257,42 @@ export default function EnvelopeAnimation({ onOpen }) {
             backgroundSize: 'cover', backgroundPosition: 'center top',
             backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
           }}>
+            {/* Luce top-left sul lembo superiore */}
             <div style={{
               position: 'absolute', inset: 0,
               clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-              background: 'linear-gradient(175deg, transparent 12%, rgba(0,0,0,0.13) 100%)',
+              background: 'linear-gradient(155deg, rgba(255,255,255,0.09) 0%, transparent 55%, rgba(0,0,0,0.08) 100%)',
+            }} />
+            {/* Ombra verso la piega — suggerisce spessore */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+              background: 'linear-gradient(to bottom, transparent 70%, rgba(0,0,0,0.11) 100%)',
             }} />
           </div>
 
-          {/* Retro del lembo — avorio caldo (si vede quando il lembo si apre) */}
+          {/* ── Retro del lembo — avorio caldo + riflesso carta ── */}
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-            background: 'linear-gradient(175deg, #FEFBF4 0%, #FAF1DC 55%, #F5E9CC 100%)',
+            background: 'linear-gradient(170deg, #FEFBF4 0%, #FAF1DC 55%, #F5E8CA 100%)',
             backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
             transform: 'rotateX(180deg)',
           }}>
-            {/* Texture carta lato interno */}
             <div style={{
               position: 'absolute', inset: 0,
               clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-              background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255,255,255,0.35) 0%, transparent 70%)',
+              background: 'radial-gradient(ellipse 55% 75% at 50% 0%, rgba(255,255,255,0.38) 0%, transparent 68%)',
             }} />
           </div>
 
-          {/* ── SIGILLO incollato al lembo ─────────────────────────────
-              bottom:0 + translate(−50%, 50%) = centrato sulla piega
-              Con il lembo chiuso appare al centro della busta.
-              Ruota INSIEME al lembo in 3D → si stacca in modo naturale.
-              backfaceVisibility:hidden → sparisce quando il lembo
-              supera i 90° (non si vede mai "al contrario").
-          ─────────────────────────────────────────────────────────── */}
+          {/* ── Sigillo — incollato al lembo, si stacca con lui in 3D ── */}
           <div style={{
             position: 'absolute',
             bottom: 0, left: '50%',
             transform: 'translate(-50%, 50%)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            zIndex: 2,
           }}>
             <img
               src="/wax-seal.png"
@@ -195,24 +308,7 @@ export default function EnvelopeAnimation({ onOpen }) {
         </motion.div>
       </div>
 
-      {/* Ombra del sigillo — sul corpo della busta, sparisce quando il lembo si apre */}
-      <motion.div
-        style={{
-          position: 'absolute',
-          left: '50%', top: '50%',
-          transform: 'translate(-50%, -50%) translateY(55px)',
-          width: 122, height: 22,
-          borderRadius: '50%',
-          background: 'rgba(38,18,4,0.30)',
-          filter: 'blur(13px)',
-          pointerEvents: 'none',
-          zIndex: 4,
-        }}
-        animate={{ opacity: isOpening ? 0 : 0.85 }}
-        transition={{ duration: 0.35 }}
-      />
-
-      {/* Hint tocca */}
+      {/* ── Hint tocca ───────────────────────────────────────────────────── */}
       <motion.div
         style={{
           position: 'absolute', bottom: '8%', left: '50%',
