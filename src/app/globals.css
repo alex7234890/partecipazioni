@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 @theme inline {
-  --color-gold:    #B8963E;
-  --color-gold-light: #D4AE60;
+  --color-gold:    #2E5230;
+  --color-gold-light: #4A7B50;
   --color-cream:   #FAF7F2;
   --color-parchment: #F3EDE3;
   --color-rose:    #C49A9A;
@@ -28,6 +28,11 @@ body {
   font-family: 'Playfair Display', Georgia, 'Times New Roman', serif;
 }
 
+/* Alex Brush utility */
+.font-alex-brush {
+  font-family: 'Alex Brush', cursive;
+}
+
 /* Testo elegante uppercase tracking */
 .label-elegant {
   font-family: 'Lato', sans-serif;
@@ -35,11 +40,11 @@ body {
   font-weight: 400;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: #B8963E;
+  color: #2E5230;
 }
 
 /* Scrollbar sottile */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #FAF7F2; }
-::-webkit-scrollbar-thumb { background: rgba(184,150,62,0.25); border-radius: 2px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(184,150,62,0.45); }
+::-webkit-scrollbar-thumb { background: rgba(46,82,48,0.25); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(46,82,48,0.45); }

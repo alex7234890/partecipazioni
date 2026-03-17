@@ -66,7 +66,7 @@ export default function Timeline() {
           left: '50%',
           top: 0, bottom: 0,
           width: 1,
-          background: 'linear-gradient(to bottom, transparent, rgba(184,150,62,0.25) 10%, rgba(184,150,62,0.25) 90%, transparent)',
+          background: 'linear-gradient(to bottom, transparent, rgba(46,82,48,0.25) 10%, rgba(46,82,48,0.25) 90%, transparent)',
           transform: 'translateX(-50%)',
         }}/>
 
@@ -92,12 +92,12 @@ export default function Timeline() {
                 width: 32, height: 32, flexShrink: 0,
                 borderRadius: '50%',
                 background: '#FAF7F2',
-                border: '1px solid rgba(184,150,62,0.45)',
+                border: '1px solid rgba(46,82,48,0.45)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#B8963E',
+                color: '#2E5230',
               }}>
                 {ICONS[item.icon] ?? (
-                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#B8963E', opacity: 0.6 }}/>
+                  <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#2E5230', opacity: 0.6 }}/>
                 )}
               </div>
 
