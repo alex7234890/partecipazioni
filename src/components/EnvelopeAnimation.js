@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
 
 function startAmbientPad() {
@@ -8,17 +8,17 @@ function startAmbientPad() {
     const ctx = new (window.AudioContext || window.webkitAudioContext)()
     const master = ctx.createGain()
     master.gain.setValueAtTime(0, ctx.currentTime)
-    master.gain.linearRampToValueAtTime(0.10, ctx.currentTime + 5)
+    master.gain.linearRampToValueAtTime(0.32, ctx.currentTime + 4)
     master.connect(ctx.destination)
     ;[130.81, 164.81, 196.00, 246.94].forEach((freq, i) => {
       const osc = ctx.createOscillator()
       const g   = ctx.createGain()
       osc.type            = 'sine'
       osc.frequency.value = freq
-      osc.detune.value    = i % 2 ? 3 : -3
-      g.gain.value        = 0.25
+      osc.detune.value    = i % 2 ? 4 : -4
+      g.gain.value        = 0.28
       osc.connect(g); g.connect(master)
-      osc.start(ctx.currentTime + i * 0.22)
+      osc.start(ctx.currentTime + i * 0.20)
     })
     return ctx
   } catch (e) { return null }
@@ -26,18 +26,41 @@ function startAmbientPad() {
 
 export default function EnvelopeAnimation({ onOpen }) {
   const [phase, setPhase] = useState('idle')
-  const audioRef = useRef(null)
-  const padRef   = useRef(null)
+  const audioRef  = useRef(null)
+  const padRef    = useRef(null)
+  const playedRef = useRef(false)
+
+  /* ── Musica ─────────────────────────────────────────────────────────
+     Tentativo immediato al mount (funziona se il browser lo permette).
+     In caso contrario scatta al primo click, che è sempre consentito.
+  ─────────────────────────────────────────────────────────────────── */
+  useEffect(() => {
+    const el = audioRef.current
+    if (!el) return
+    el.volume = 0.75
+    el.play().catch(() => {
+      /* autoplay bloccato — aspettiamo il click (handleClick lo riprova) */
+    })
+  }, [])
+
+  const playMusic = () => {
+    if (playedRef.current) return
+    playedRef.current = true
+    const el = audioRef.current
+    if (el) {
+      el.volume = 0.75
+      el.play().catch(() => { padRef.current = startAmbientPad() })
+    } else {
+      padRef.current = startAmbientPad()
+    }
+  }
 
   const handleClick = () => {
     if (phase !== 'idle') return
+    playMusic()
     setPhase('opening')
-    if (audioRef.current) {
-      audioRef.current.volume = 0.35
-      audioRef.current.play().catch(() => { padRef.current = startAmbientPad() })
-    }
     setTimeout(() => setPhase('done'),  2800)
-    setTimeout(() => onOpen?.(),        3200)
+    setTimeout(() => onOpen?.(),        3300)
   }
 
   const isOpening = phase === 'opening' || phase === 'done'
@@ -47,32 +70,43 @@ export default function EnvelopeAnimation({ onOpen }) {
     <motion.div
       className="fixed inset-0 z-50 cursor-pointer select-none overflow-hidden"
       onClick={handleClick}
-      whileTap={{ scale: 0.995 }}
+      whileTap={{ scale: 0.997 }}
       animate={isDone ? { opacity: 0 } : { opacity: 1 }}
-      transition={{ duration: 0.6 }}
+      transition={{ duration: 0.65 }}
     >
-      <audio ref={audioRef} src="/music.mp3" loop preload="none" />
+      <audio ref={audioRef} src="/music.mp3" loop preload="auto" />
 
-      {/* ── Sfondo busta ─────────────────────────────────────────────────
-          /public/envelope-bg.png  (priorità) o  /public/envelope-bg.jpg
-      ──────────────────────────────────────────────────────────────── */}
+      {/* Sfondo busta */}
       <div style={{
         position: 'absolute', inset: 0,
         background: '#EDE6D9',
         backgroundImage: "url('/envelope-bg.png'), url('/envelope-bg.jpg')",
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
+        backgroundSize: 'cover', backgroundPosition: 'center',
       }} />
 
-      {/* ── Lembo superiore — apertura fisica con spring ─────────────────
-          perspective sul parent + transformStyle preserve-3d sul figlio
-          spring stiffness bassa + damping basso = overshoot realistico
-          come carta vera che rimbalza quando si apre
-      ──────────────────────────────────────────────────────────────── */}
+      {/* ── Luce calda dall'interno ──────────────────────────────────── */}
+      <motion.div
+        style={{
+          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5,
+          background: 'radial-gradient(ellipse 70% 52% at 50% 44%, rgba(255,248,210,0.92) 0%, transparent 60%)',
+        }}
+        initial={{ opacity: 0 }}
+        animate={isOpening ? { opacity: 1 } : { opacity: 0 }}
+        transition={{ delay: 0.14, duration: 1.5 }}
+      />
+
+      {/* ══════════════════════════════════════════════════════════════
+          LEMBO SUPERIORE — fisica 3D con spring
+          ─────────────────────────────────────────────────────────────
+          • perspective + perspectiveOrigin sul contenitore
+          • preserve-3d sul lembo → i figli vivono in 3D
+          • spring sottosterzata = overshoot cartaceo realistico
+          • il SIGILLO è figlio del lembo: si stacca con lui in 3D,
+            backfaceVisibility:hidden = sparisce quando il lembo si rovescia
+      ═══════════════════════════════════════════════════════════════ */}
       <div style={{
         position: 'absolute', inset: 0,
-        perspective: '3200px',
+        perspective: '2800px',
         perspectiveOrigin: '50% 0%',
         zIndex: 6, pointerEvents: 'none',
       }}>
@@ -83,100 +117,94 @@ export default function EnvelopeAnimation({ onOpen }) {
             transformStyle: 'preserve-3d',
           }}
           initial={{ rotateX: 0 }}
-          animate={isOpening ? { rotateX: -185 } : { rotateX: 0 }}
+          animate={isOpening ? { rotateX: -186 } : { rotateX: 0 }}
           transition={isOpening
             ? {
-                delay: 0.18,
+                delay: 0.16,
                 type: 'spring',
-                stiffness: 38,   /* molla morbida = movimento lento e fisico */
-                damping: 9,      /* sottosterzato = leggero overshoot poi si assesta */
-                mass: 1.6,
+                stiffness: 36,   /* lento, come carta pesante */
+                damping: 8.5,    /* sottosterzato: overshoot + assestamento */
+                mass: 1.8,
               }
-            : { duration: 0.4 }
+            : { duration: 0.35 }
           }
         >
-          {/* Faccia frontale del lembo: stessa immagine = continuità visiva */}
+          {/* Fronte del lembo — immagine continua */}
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
             backgroundImage: "url('/envelope-bg.png'), url('/envelope-bg.jpg')",
-            backgroundSize: 'cover',
-            backgroundPosition: 'center top',
-            backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
+            backgroundSize: 'cover', backgroundPosition: 'center top',
+            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
           }}>
-            {/* Ombra verso il punto di piega */}
             <div style={{
               position: 'absolute', inset: 0,
               clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-              background: 'linear-gradient(175deg, transparent 15%, rgba(0,0,0,0.12) 100%)',
+              background: 'linear-gradient(175deg, transparent 12%, rgba(0,0,0,0.13) 100%)',
             }} />
           </div>
 
-          {/* Faccia interna: carta avorio caldo */}
+          {/* Retro del lembo — avorio caldo (si vede quando il lembo si apre) */}
           <div style={{
             position: 'absolute', inset: 0,
             clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
-            background: 'linear-gradient(175deg, #FEFBF4 0%, #FAF2DE 100%)',
+            background: 'linear-gradient(175deg, #FEFBF4 0%, #FAF1DC 55%, #F5E9CC 100%)',
+            backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden',
+            transform: 'rotateX(180deg)',
+          }}>
+            {/* Texture carta lato interno */}
+            <div style={{
+              position: 'absolute', inset: 0,
+              clipPath: 'polygon(0 0, 100% 0, 50% 100%)',
+              background: 'radial-gradient(ellipse 60% 80% at 50% 0%, rgba(255,255,255,0.35) 0%, transparent 70%)',
+            }} />
+          </div>
+
+          {/* ── SIGILLO incollato al lembo ─────────────────────────────
+              bottom:0 + translate(−50%, 50%) = centrato sulla piega
+              Con il lembo chiuso appare al centro della busta.
+              Ruota INSIEME al lembo in 3D → si stacca in modo naturale.
+              backfaceVisibility:hidden → sparisce quando il lembo
+              supera i 90° (non si vede mai "al contrario").
+          ─────────────────────────────────────────────────────────── */}
+          <div style={{
+            position: 'absolute',
+            bottom: 0, left: '50%',
+            transform: 'translate(-50%, 50%)',
             backfaceVisibility: 'hidden',
             WebkitBackfaceVisibility: 'hidden',
-            transform: 'rotateX(180deg)',
-          }} />
+            zIndex: 2,
+          }}>
+            <img
+              src="/wax-seal.png"
+              alt=""
+              style={{
+                display: 'block',
+                width: 140, height: 140,
+                objectFit: 'cover',
+                borderRadius: '50%',
+              }}
+            />
+          </div>
         </motion.div>
       </div>
 
-      {/* Luce calda dall'interno quando il lembo si apre */}
+      {/* Ombra del sigillo — sul corpo della busta, sparisce quando il lembo si apre */}
       <motion.div
         style={{
-          position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 5,
-          background: 'radial-gradient(ellipse 70% 50% at 50% 44%, rgba(255,248,210,0.90) 0%, transparent 62%)',
+          position: 'absolute',
+          left: '50%', top: '50%',
+          transform: 'translate(-50%, -50%) translateY(55px)',
+          width: 122, height: 22,
+          borderRadius: '50%',
+          background: 'rgba(38,18,4,0.30)',
+          filter: 'blur(13px)',
+          pointerEvents: 'none',
+          zIndex: 4,
         }}
-        initial={{ opacity: 0 }}
-        animate={isOpening ? { opacity: 1 } : { opacity: 0 }}
-        transition={{ delay: 0.15, duration: 1.4 }}
+        animate={{ opacity: isOpening ? 0 : 0.85 }}
+        transition={{ duration: 0.35 }}
       />
-
-      {/* ── Sigillo cera ─────────────────────────────────────────────────
-          File: /public/wax-seal.png
-          Animazione: dondola a riposo, vola via al tocco con leggera rotazione
-      ──────────────────────────────────────────────────────────────── */}
-      <div style={{
-        position: 'absolute', left: '50%', top: '50%',
-        transform: 'translate(-50%, -50%)',
-        zIndex: 15,
-      }}>
-        <motion.div
-          animate={isOpening
-            ? { y: -310, opacity: 0, scale: 0.72, rotate: 8 }
-            : { y: [0, -6, 0], scale: [1, 1.018, 1], rotate: 0 }
-          }
-          transition={isOpening
-            ? { duration: 0.70, ease: [0.30, 0, 0.15, 1] }
-            : { duration: 3.4, repeat: Infinity, ease: 'easeInOut' }
-          }
-        >
-          {/* Ombra morbida sotto il sigillo */}
-          <div style={{
-            position: 'absolute', bottom: -16, left: '6%',
-            width: '88%', height: 24, borderRadius: '50%',
-            background: 'rgba(40,20,5,0.28)',
-            filter: 'blur(14px)',
-          }} />
-
-          {/* Immagine sigillo */}
-          <img
-            src="/wax-seal.png"
-            alt=""
-            style={{
-              display: 'block',
-              width: 140, height: 140,
-              objectFit: 'cover',
-              borderRadius: '50%',
-              position: 'relative',
-            }}
-          />
-        </motion.div>
-      </div>
 
       {/* Hint tocca */}
       <motion.div
@@ -194,7 +222,7 @@ export default function EnvelopeAnimation({ onOpen }) {
             fontFamily: "'Lato', sans-serif",
             fontSize: '0.68rem', letterSpacing: '0.28em', color: '#7A5E48',
           }}
-          animate={{ opacity: [0.30, 0.75, 0.30] }}
+          animate={{ opacity: [0.28, 0.72, 0.28] }}
           transition={{ duration: 2.6, repeat: Infinity, ease: 'easeInOut' }}
         >
           TOCCA PER APRIRE
@@ -203,7 +231,7 @@ export default function EnvelopeAnimation({ onOpen }) {
           animate={{ y: [0, 3, 0] }}
           transition={{ duration: 1.9, repeat: Infinity, ease: 'easeInOut' }}
         >
-          <path d="M1 1L8 8L15 1" stroke="#7A5E48" strokeOpacity="0.42"
+          <path d="M1 1L8 8L15 1" stroke="#7A5E48" strokeOpacity="0.40"
             strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </motion.svg>
       </motion.div>
