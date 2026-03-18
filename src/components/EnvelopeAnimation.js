@@ -70,6 +70,7 @@ export default function EnvelopeAnimation({ onOpen }) {
         autoPlay
         muted
         playsInline
+        controls={false}
         preload="auto"
         onLoadedData={handleVideoLoaded}
         style={{
