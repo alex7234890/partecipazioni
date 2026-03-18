@@ -410,7 +410,7 @@ export default function DashboardPage() {
       <header className="bg-white border-b border-gold/20 px-4 sm:px-8 py-4 flex items-center justify-between sticky top-0 z-30">
         <div>
           <h1 className="font-playfair text-xl sm:text-2xl text-gold">Dashboard Sposi</h1>
-          <p className="text-charcoal/50 text-xs mt-0.5">Matteo &amp; Clio</p>
+          <p className="text-charcoal/50 text-xs mt-0.5">Matteo e Clio</p>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -587,7 +587,7 @@ export default function DashboardPage() {
                 <thead>
                   <tr className="bg-cream/50 border-b border-gold/10">
                     <th className="text-left px-4 py-3 font-medium text-charcoal/55 text-xs">Invitato</th>
-                    <th className="text-left px-4 py-3 font-medium text-charcoal/55 text-xs">Componenti &amp; presenza</th>
+                    <th className="text-left px-4 py-3 font-medium text-charcoal/55 text-xs">Componenti e presenza</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/55 text-xs hidden md:table-cell">Messaggio</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/55 text-xs">Link</th>
                     <th className="px-3 py-3 w-8"></th>
