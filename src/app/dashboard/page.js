@@ -219,17 +219,19 @@ export default function DashboardPage() {
   // ── Aggiungi ospite ─────────────────────────────────────────────────
   const handleAddGuest = async (e) => {
     e.preventDefault()
-    if (!newName.trim()) return
     const validMembers = newMembers.filter(m => m.name.trim())
     if (validMembers.length === 0) { showToast('Aggiungi almeno un componente', 'error'); return }
+    // Nome gruppo opzionale: se vuoto e un solo componente, usa il nome di quel componente
+    const groupName = newName.trim() || (validMembers.length === 1 ? validMembers[0].name.trim() : '')
+    if (!groupName) { showToast('Inserisci il nome del gruppo per più componenti', 'error'); return }
 
     setAddingGuest(true)
     setNewGuestSlug(null)
-    const slug = slugify(newName.trim())
+    const slug = slugify(groupName)
 
     const { data: guestData, error: guestError } = await supabase
       .from('guests')
-      .insert({ name: newName.trim(), slug, max_guests: validMembers.length })
+      .insert({ name: groupName, slug, max_guests: validMembers.length })
       .select('id, slug')
       .single()
 
@@ -462,28 +464,39 @@ export default function DashboardPage() {
 
         {/* ── Form aggiungi ospite ──────────────────────────────────── */}
         <div className="bg-white rounded-xl border border-gold/20 p-5 mb-6 shadow-sm">
-          <h2 className="font-playfair text-gold mb-4">Aggiungi invito / nucleo familiare</h2>
+          <h2 className="font-playfair text-gold mb-1">Aggiungi invito</h2>
+          <p className="text-xs text-charcoal/45 mb-4">Persona singola o nucleo familiare — aggiungi tutti i componenti.</p>
           <form onSubmit={handleAddGuest}>
-            {/* Nome gruppo */}
+            {/* Nome gruppo — opzionale per persone singole */}
             <div className="mb-4">
-              <label className="text-xs text-charcoal/50 block mb-1.5">Nome gruppo (es. Famiglia Rossi)</label>
+              <label className="text-xs text-charcoal/50 block mb-1.5">
+                Nome invito
+                {newMembers.filter(m => m.name.trim()).length === 1 && !newName.trim() && (
+                  <span className="ml-2 text-charcoal/30 font-normal">(opzionale — userà il nome del componente)</span>
+                )}
+                {newMembers.filter(m => m.name.trim()).length > 1 && !newName.trim() && (
+                  <span className="ml-2 text-amber-500 font-normal">(obbligatorio per più componenti)</span>
+                )}
+              </label>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => { setNewName(e.target.value); setNewGuestSlug(null) }}
-                placeholder="Famiglia Rossi"
+                placeholder="es. Mario Rossi  oppure  Famiglia Rossi"
                 className="w-full border border-gold/20 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
               />
-              {newName.trim() && !newGuestSlug && (
+              {(newName.trim() || newMembers.filter(m=>m.name.trim()).length === 1) && !newGuestSlug && (
                 <p className="text-xs text-charcoal/35 mt-1">
-                  Slug: <span className="font-mono text-gold/60">{slugify(newName.trim())}</span>
+                  Slug: <span className="font-mono text-gold/60">
+                    {slugify(newName.trim() || newMembers.filter(m=>m.name.trim())[0]?.name || '')}
+                  </span>
                 </p>
               )}
             </div>
 
             {/* Lista componenti */}
             <div className="mb-4">
-              <label className="text-xs text-charcoal/50 block mb-2">Componenti del nucleo</label>
+              <label className="text-xs text-charcoal/50 block mb-2">Componenti</label>
               <div className="flex flex-col gap-2">
                 {newMembers.map((m, i) => (
                   <div key={i} className="flex items-center gap-2">
