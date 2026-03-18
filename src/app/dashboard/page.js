@@ -5,10 +5,10 @@ import { createClient } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 
 const STATUS_LABELS = {
-  yes: { label: 'Confermato', color: 'bg-green-100 text-green-700 border-green-200' },
-  no: { label: 'Declinato', color: 'bg-red-100 text-red-700 border-red-200' },
-  maybe: { label: 'Forse', color: 'bg-amber-100 text-amber-700 border-amber-200' },
-  pending: { label: 'In attesa', color: 'bg-gray-100 text-gray-600 border-gray-200' },
+  yes:     { label: 'Confermato',  color: 'bg-green-100 text-green-700 border-green-200' },
+  no:      { label: 'Declinato',   color: 'bg-red-100 text-red-700 border-red-200' },
+  maybe:   { label: 'Parziale',    color: 'bg-amber-100 text-amber-700 border-amber-200' },
+  pending: { label: 'In attesa',   color: 'bg-gray-100 text-gray-600 border-gray-200' },
 }
 
 function slugify(name) {
@@ -20,6 +20,7 @@ function slugify(name) {
     .replace(/^-+|-+$/g, '')
 }
 
+// ── Mostra link dopo aggiunta ─────────────────────────────────────────
 function LinkBox({ slug, onClose }) {
   const [copied, setCopied] = useState(false)
   const url = typeof window !== 'undefined'
@@ -57,6 +58,7 @@ function LinkBox({ slug, onClose }) {
   )
 }
 
+// ── Modale elimina ────────────────────────────────────────────────────
 function DeleteConfirm({ guest, onConfirm, onCancel, loading }) {
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center px-4">
@@ -65,23 +67,14 @@ function DeleteConfirm({ guest, onConfirm, onCancel, loading }) {
         <p className="text-charcoal/60 text-sm mb-5">
           Sei sicuro di voler eliminare <strong>{guest.name}</strong>?
           {guest.rsvp_status !== 'pending' && (
-            <span className="block mt-1 text-amber-600">
-              Attenzione: ha già risposto all&apos;invito.
-            </span>
+            <span className="block mt-1 text-amber-600">Attenzione: ha già risposto all&apos;invito.</span>
           )}
         </p>
         <div className="flex gap-3">
-          <button
-            onClick={onCancel}
-            className="flex-1 border border-gray-200 text-charcoal/70 py-2.5 rounded-lg text-sm hover:bg-gray-50 transition-colors"
-          >
+          <button onClick={onCancel} className="flex-1 border border-gray-200 text-charcoal/70 py-2.5 rounded-lg text-sm hover:bg-gray-50 transition-colors">
             Annulla
           </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="flex-1 bg-red-500 text-white py-2.5 rounded-lg text-sm hover:bg-red-600 transition-colors disabled:opacity-60"
-          >
+          <button onClick={onConfirm} disabled={loading} className="flex-1 bg-red-500 text-white py-2.5 rounded-lg text-sm hover:bg-red-600 transition-colors disabled:opacity-60">
             {loading ? 'Eliminazione…' : 'Elimina'}
           </button>
         </div>
@@ -90,21 +83,108 @@ function DeleteConfirm({ guest, onConfirm, onCancel, loading }) {
   )
 }
 
+// ── Cella link con copia ──────────────────────────────────────────────
+function GuestLinkCell({ slug }) {
+  const [copied, setCopied] = useState(false)
+  const url = typeof window !== 'undefined'
+    ? `${window.location.origin}/invite/${slug}`
+    : `/invite/${slug}`
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(url)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
+
+  return (
+    <div className="flex items-center gap-1.5 max-w-[200px]">
+      <code className="text-xs text-gold/70 truncate">/invite/{slug}</code>
+      <button
+        onClick={handleCopy}
+        className={`flex-shrink-0 text-xs px-2 py-0.5 rounded transition-colors ${
+          copied ? 'text-green-600 bg-green-50' : 'text-charcoal/40 hover:text-gold hover:bg-gold/5'
+        }`}
+        title="Copia link"
+      >
+        {copied ? '✓' : '⎘'}
+      </button>
+    </div>
+  )
+}
+
+// ── Cella componenti ──────────────────────────────────────────────────
+function MembersCell({ members }) {
+  if (!members || members.length === 0) return <span className="text-charcoal/30 text-xs">—</span>
+  const adults   = members.filter(m => !m.is_child)
+  const children = members.filter(m => m.is_child)
+  return (
+    <div>
+      <div className="text-xs text-charcoal/45 mb-0.5">
+        {adults.length > 0 && <span>👨 {adults.length}</span>}
+        {adults.length > 0 && children.length > 0 && <span className="mx-1">·</span>}
+        {children.length > 0 && <span>👶 {children.length}</span>}
+      </div>
+      <div className="text-xs text-charcoal/65 max-w-[160px] truncate">
+        {members.map(m => m.is_child ? `${m.name} (bimbo/a)` : m.name).join(', ')}
+      </div>
+    </div>
+  )
+}
+
+// ── Cella RSVP con dettaglio per-persona ──────────────────────────────
+function RsvpCell({ guest }) {
+  const members = guest.guest_members || []
+  const yes     = members.filter(m => m.rsvp_status === 'yes').length
+  const no      = members.filter(m => m.rsvp_status === 'no').length
+  const pending = members.filter(m => m.rsvp_status === 'pending').length
+
+  return (
+    <div>
+      <span className={`inline-block border text-xs px-2 py-0.5 rounded-full ${STATUS_LABELS[guest.rsvp_status]?.color}`}>
+        {STATUS_LABELS[guest.rsvp_status]?.label}
+      </span>
+      {members.length > 0 && guest.rsvp_status !== 'pending' && (
+        <div className="text-xs mt-0.5" style={{ color: 'rgba(44,36,32,0.4)' }}>
+          {yes > 0 && <span style={{ color: '#4caf50' }}>{yes}✓ </span>}
+          {no > 0 && <span style={{ color: '#c0392b' }}>{no}✗ </span>}
+          {pending > 0 && <span>{pending}?</span>}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── Cella allergie aggregate ──────────────────────────────────────────
+function AllergiesCell({ members }) {
+  if (!members || members.length === 0) return <span className="text-charcoal/30">—</span>
+  const withAllergies = members.filter(m => m.allergies && m.rsvp_status === 'yes')
+  if (withAllergies.length === 0) return <span className="text-charcoal/30">—</span>
+  return (
+    <span className="text-xs text-charcoal/60">
+      {withAllergies.map(m => `${m.name.split(' ')[0]}: ${m.allergies}`).join(' · ')}
+    </span>
+  )
+}
+
+// ── Pagina principale ─────────────────────────────────────────────────
 export default function DashboardPage() {
-  const router = useRouter()
+  const router   = useRouter()
   const supabase = createClient()
-  const [guests, setGuests] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
+  const [guests, setGuests]     = useState([])
+  const [loading, setLoading]   = useState(true)
+  const [filter, setFilter]     = useState('all')
+  const [search, setSearch]     = useState('')
+
   // form aggiungi ospite
-  const [newName, setNewName] = useState('')
-  const [newMaxGuests, setNewMaxGuests] = useState(1)
+  const [newName, setNewName]         = useState('')
+  const [newMembers, setNewMembers]   = useState([{ name: '', is_child: false }])
   const [addingGuest, setAddingGuest] = useState(false)
   const [newGuestSlug, setNewGuestSlug] = useState(null)
+
   // elimina
   const [deleteTarget, setDeleteTarget] = useState(null)
-  const [deletingId, setDeletingId] = useState(null)
+  const [deletingId, setDeletingId]     = useState(null)
+
   // altri
   const [reminderLoading, setReminderLoading] = useState(false)
   const [toast, setToast] = useState(null)
@@ -112,15 +192,13 @@ export default function DashboardPage() {
   const fetchGuests = useCallback(async () => {
     const { data } = await supabase
       .from('guests')
-      .select('*')
+      .select('*, guest_members(*)')
       .order('created_at', { ascending: false })
     setGuests(data || [])
     setLoading(false)
   }, [supabase])
 
-  useEffect(() => {
-    fetchGuests()
-  }, [fetchGuests])
+  useEffect(() => { fetchGuests() }, [fetchGuests])
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type })
@@ -132,38 +210,64 @@ export default function DashboardPage() {
     router.push('/login')
   }
 
+  // ── Helpers form membri ─────────────────────────────────────────────
+  const addMemberRow    = () => setNewMembers(prev => [...prev, { name: '', is_child: false }])
+  const removeMemberRow = (i) => setNewMembers(prev => prev.filter((_, idx) => idx !== i))
+  const updateMember    = (i, field, value) =>
+    setNewMembers(prev => prev.map((m, idx) => idx === i ? { ...m, [field]: value } : m))
+
+  // ── Aggiungi ospite ─────────────────────────────────────────────────
   const handleAddGuest = async (e) => {
     e.preventDefault()
     if (!newName.trim()) return
+    const validMembers = newMembers.filter(m => m.name.trim())
+    if (validMembers.length === 0) { showToast('Aggiungi almeno un componente', 'error'); return }
+
     setAddingGuest(true)
     setNewGuestSlug(null)
     const slug = slugify(newName.trim())
-    const { error } = await supabase
+
+    const { data: guestData, error: guestError } = await supabase
       .from('guests')
-      .insert({ name: newName.trim(), slug, max_guests: newMaxGuests })
-    if (error) {
+      .insert({ name: newName.trim(), slug, max_guests: validMembers.length })
+      .select('id, slug')
+      .single()
+
+    if (guestError) {
       showToast(
-        error.message.includes('unique')
+        guestError.message.includes('unique')
           ? 'Slug già esistente, prova un nome diverso'
-          : error.message,
+          : guestError.message,
         'error'
       )
+      setAddingGuest(false)
+      return
+    }
+
+    const { error: membersError } = await supabase
+      .from('guest_members')
+      .insert(validMembers.map(m => ({
+        guest_id: guestData.id,
+        name: m.name.trim(),
+        is_child: m.is_child,
+      })))
+
+    if (membersError) {
+      showToast('Errore nell\'inserimento dei componenti: ' + membersError.message, 'error')
     } else {
-      setNewGuestSlug(slug)
+      setNewGuestSlug(guestData.slug)
       setNewName('')
-      setNewMaxGuests(1)
+      setNewMembers([{ name: '', is_child: false }])
       fetchGuests()
     }
     setAddingGuest(false)
   }
 
+  // ── Elimina ospite ──────────────────────────────────────────────────
   const handleDelete = async () => {
     if (!deleteTarget) return
     setDeletingId(deleteTarget.id)
-    const { error } = await supabase
-      .from('guests')
-      .delete()
-      .eq('id', deleteTarget.id)
+    const { error } = await supabase.from('guests').delete().eq('id', deleteTarget.id)
     if (error) {
       showToast('Errore eliminazione: ' + error.message, 'error')
     } else {
@@ -194,27 +298,30 @@ export default function DashboardPage() {
   }
 
   const handleExportCSV = () => {
-    const headers = ['Nome', 'Slug', 'Persone', 'RSVP', 'Allergie', 'Messaggio', 'Risposto il', 'Creato il']
-    const rows = guests.map((g) => [
-      g.name,
-      g.slug,
-      g.max_guests,
-      STATUS_LABELS[g.rsvp_status]?.label || g.rsvp_status,
-      g.allergies || '',
-      g.message || '',
-      g.responded_at ? new Date(g.responded_at).toLocaleDateString('it-IT') : '',
-      new Date(g.created_at).toLocaleDateString('it-IT'),
-    ])
+    const headers = ['Nome', 'Slug', 'Adulti', 'Bimbi', 'Componenti', 'RSVP', 'Allergie', 'Messaggio', 'Risposto il']
+    const rows = guests.map((g) => {
+      const members  = g.guest_members || []
+      const adults   = members.filter(m => !m.is_child).length
+      const children = members.filter(m => m.is_child).length
+      const memberNames = members.map(m => m.is_child ? `${m.name}(B)` : m.name).join(' | ')
+      const allergies = members.filter(m => m.allergies).map(m => `${m.name.split(' ')[0]}: ${m.allergies}`).join('; ')
+      return [
+        g.name, g.slug, adults, children, memberNames,
+        STATUS_LABELS[g.rsvp_status]?.label || g.rsvp_status,
+        allergies,
+        g.message || '',
+        g.responded_at ? new Date(g.responded_at).toLocaleDateString('it-IT') : '',
+      ]
+    })
     const csv = [headers, ...rows].map((r) => r.map((c) => `"${c}"`).join(',')).join('\n')
     const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = 'ospiti-matrimonio.csv'
-    a.click()
+    const url  = URL.createObjectURL(blob)
+    const a    = document.createElement('a')
+    a.href = url; a.download = 'ospiti-matrimonio.csv'; a.click()
     URL.revokeObjectURL(url)
   }
 
+  // ── Filtro e ricerca ────────────────────────────────────────────────
   const filtered = guests.filter((g) => {
     const matchFilter = filter === 'all' || g.rsvp_status === filter
     const matchSearch =
@@ -223,32 +330,53 @@ export default function DashboardPage() {
     return matchFilter && matchSearch
   })
 
+  // ── Statistiche da guest_members ────────────────────────────────────
+  const allMembers = guests.flatMap(g => g.guest_members || [])
   const counts = {
-    // inviti (righe nel DB)
-    totalInvites: guests.length,
-    yesInvites: guests.filter((g) => g.rsvp_status === 'yes').length,
-    noInvites: guests.filter((g) => g.rsvp_status === 'no').length,
-    maybeInvites: guests.filter((g) => g.rsvp_status === 'maybe').length,
-    pendingInvites: guests.filter((g) => g.rsvp_status === 'pending').length,
-    // persone reali (somma max_guests)
-    totalPeople: guests.reduce((s, g) => s + (g.max_guests || 1), 0),
-    yesPeople: guests
-      .filter((g) => g.rsvp_status === 'yes')
-      .reduce((s, g) => s + (g.max_guests || 1), 0),
-    noPeople: guests
-      .filter((g) => g.rsvp_status === 'no')
-      .reduce((s, g) => s + (g.max_guests || 1), 0),
-    maybePeople: guests
-      .filter((g) => g.rsvp_status === 'maybe')
-      .reduce((s, g) => s + (g.max_guests || 1), 0),
-    pendingPeople: guests
-      .filter((g) => g.rsvp_status === 'pending')
-      .reduce((s, g) => s + (g.max_guests || 1), 0),
+    totalInvites:  guests.length,
+    totalAdults:   allMembers.filter(m => !m.is_child).length,
+    totalChildren: allMembers.filter(m => m.is_child).length,
+    yesAdults:     allMembers.filter(m => !m.is_child && m.rsvp_status === 'yes').length,
+    yesChildren:   allMembers.filter(m => m.is_child  && m.rsvp_status === 'yes').length,
+    noAdults:      allMembers.filter(m => !m.is_child && m.rsvp_status === 'no').length,
+    noChildren:    allMembers.filter(m => m.is_child  && m.rsvp_status === 'no').length,
+    maybeAdults:   allMembers.filter(m => !m.is_child && m.rsvp_status === 'pending' && guests.find(g => g.id === m.guest_id)?.rsvp_status === 'maybe').length,
+    pendingInvites: guests.filter(g => g.rsvp_status === 'pending').length,
+    pendingAdults:  allMembers.filter(m => !m.is_child && m.rsvp_status === 'pending').length,
+    pendingChildren:allMembers.filter(m => m.is_child  && m.rsvp_status === 'pending').length,
   }
+
+  const statCards = [
+    {
+      label: 'Totale', color: 'border-gray-200',
+      adults: counts.totalAdults, children: counts.totalChildren,
+      invites: counts.totalInvites,
+    },
+    {
+      label: 'Confermati', color: 'border-green-200',
+      adults: counts.yesAdults, children: counts.yesChildren,
+      invites: guests.filter(g => g.rsvp_status === 'yes').length,
+    },
+    {
+      label: 'Declinati', color: 'border-red-200',
+      adults: counts.noAdults, children: counts.noChildren,
+      invites: guests.filter(g => g.rsvp_status === 'no').length,
+    },
+    {
+      label: 'Parziali/Forse', color: 'border-amber-200',
+      adults: allMembers.filter(m => !m.is_child && guests.find(g => g.id === m.guest_id)?.rsvp_status === 'maybe').length,
+      children: allMembers.filter(m => m.is_child && guests.find(g => g.id === m.guest_id)?.rsvp_status === 'maybe').length,
+      invites: guests.filter(g => g.rsvp_status === 'maybe').length,
+    },
+    {
+      label: 'In attesa', color: 'border-gray-200',
+      adults: counts.pendingAdults, children: counts.pendingChildren,
+      invites: counts.pendingInvites,
+    },
+  ]
 
   return (
     <div className="min-h-screen bg-cream">
-      {/* Modale conferma eliminazione */}
       {deleteTarget && (
         <DeleteConfirm
           guest={deleteTarget}
@@ -258,11 +386,10 @@ export default function DashboardPage() {
         />
       )}
 
-      {/* Toast */}
       {toast && (
         <div className={`fixed top-4 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-sm font-medium transition-all ${
           toast.type === 'error' ? 'bg-red-500 text-white' :
-          toast.type === 'info' ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
+          toast.type === 'info'  ? 'bg-blue-500 text-white' : 'bg-green-500 text-white'
         }`}>
           {toast.msg}
         </div>
@@ -283,26 +410,29 @@ export default function DashboardPage() {
       </header>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-8 py-8">
-        {/* Contatori */}
+
+        {/* Statistiche */}
         <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 mb-3">
-          {[
-            { label: 'Totale', invites: counts.totalInvites, people: counts.totalPeople, color: 'border-gray-200' },
-            { label: 'Confermati', invites: counts.yesInvites, people: counts.yesPeople, color: 'border-green-200' },
-            { label: 'Declinati', invites: counts.noInvites, people: counts.noPeople, color: 'border-red-200' },
-            { label: 'Forse', invites: counts.maybeInvites, people: counts.maybePeople, color: 'border-amber-200' },
-            { label: 'In attesa', invites: counts.pendingInvites, people: counts.pendingPeople, color: 'border-gray-200' },
-          ].map((c) => (
+          {statCards.map((c) => (
             <div key={c.label} className={`bg-white rounded-xl border ${c.color} p-4 text-center shadow-sm`}>
-              <div className="font-playfair text-2xl text-gold">{c.people}</div>
+              <div className="font-playfair text-2xl text-gold">
+                {c.adults + c.children}
+              </div>
               <div className="text-xs font-medium text-charcoal/70 mt-0.5">{c.label}</div>
-              <div className="text-xs text-charcoal/40 mt-1">
+              <div className="text-xs text-charcoal/40 mt-1 leading-relaxed">
+                {c.adults > 0 && <span>👨 {c.adults}</span>}
+                {c.adults > 0 && c.children > 0 && <span> · </span>}
+                {c.children > 0 && <span>👶 {c.children}</span>}
+                {c.adults === 0 && c.children === 0 && <span>—</span>}
+              </div>
+              <div className="text-xs text-charcoal/30 mt-0.5">
                 {c.invites} {c.invites === 1 ? 'invito' : 'inviti'}
               </div>
             </div>
           ))}
         </div>
         <p className="text-xs text-charcoal/40 mb-6 text-right">
-          Il numero grande indica le <strong>persone</strong>, quello piccolo gli <strong>inviti</strong>
+          Il numero grande = persone totali (👨 adulti · 👶 bimbi)
         </p>
 
         {/* Azioni */}
@@ -312,7 +442,8 @@ export default function DashboardPage() {
             className="flex items-center gap-2 bg-white border border-gold/30 text-gold px-4 py-2 rounded-lg text-sm hover:bg-gold/5 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
             Esporta CSV
           </button>
@@ -322,70 +453,91 @@ export default function DashboardPage() {
             className="flex items-center gap-2 bg-white border border-rose/30 text-rose px-4 py-2 rounded-lg text-sm hover:bg-rose/5 transition-colors disabled:opacity-60"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
+                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
             </svg>
-            {reminderLoading ? 'Invio…' : `Promemoria in attesa (${counts.pending})`}
+            {reminderLoading ? 'Invio…' : `Promemoria (${counts.pendingInvites} in attesa)`}
           </button>
         </div>
 
-        {/* Aggiungi ospite */}
+        {/* ── Form aggiungi ospite ──────────────────────────────────── */}
         <div className="bg-white rounded-xl border border-gold/20 p-5 mb-6 shadow-sm">
-          <h2 className="font-playfair text-gold mb-4">Aggiungi ospite</h2>
+          <h2 className="font-playfair text-gold mb-4">Aggiungi invito / nucleo familiare</h2>
           <form onSubmit={handleAddGuest}>
-            <div className="flex flex-col sm:flex-row gap-3">
-              {/* Nome */}
+            {/* Nome gruppo */}
+            <div className="mb-4">
+              <label className="text-xs text-charcoal/50 block mb-1.5">Nome gruppo (es. Famiglia Rossi)</label>
               <input
                 type="text"
                 value={newName}
                 onChange={(e) => { setNewName(e.target.value); setNewGuestSlug(null) }}
-                placeholder="Nome (es. Famiglia Rossi)"
-                className="flex-1 border border-gold/20 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
+                placeholder="Famiglia Rossi"
+                className="w-full border border-gold/20 rounded-lg px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
               />
-              {/* Numero persone */}
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <label className="text-xs text-charcoal/50 whitespace-nowrap">N° persone</label>
-                <div className="flex items-center border border-gold/20 rounded-lg overflow-hidden bg-cream/40">
-                  <button
-                    type="button"
-                    onClick={() => setNewMaxGuests((n) => Math.max(1, n - 1))}
-                    className="px-3 py-2.5 text-gold hover:bg-gold/10 transition-colors text-lg leading-none font-bold"
-                  >
-                    −
-                  </button>
-                  <span className="w-8 text-center text-sm font-medium text-charcoal">
-                    {newMaxGuests}
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setNewMaxGuests((n) => Math.min(20, n + 1))}
-                    className="px-3 py-2.5 text-gold hover:bg-gold/10 transition-colors text-lg leading-none font-bold"
-                  >
-                    +
-                  </button>
-                </div>
+              {newName.trim() && !newGuestSlug && (
+                <p className="text-xs text-charcoal/35 mt-1">
+                  Slug: <span className="font-mono text-gold/60">{slugify(newName.trim())}</span>
+                </p>
+              )}
+            </div>
+
+            {/* Lista componenti */}
+            <div className="mb-4">
+              <label className="text-xs text-charcoal/50 block mb-2">Componenti del nucleo</label>
+              <div className="flex flex-col gap-2">
+                {newMembers.map((m, i) => (
+                  <div key={i} className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={m.name}
+                      onChange={(e) => updateMember(i, 'name', e.target.value)}
+                      placeholder="Nome e Cognome (es. Francesco Rossi)"
+                      className="flex-1 border border-gold/20 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gold/30 bg-cream/40"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => updateMember(i, 'is_child', !m.is_child)}
+                      className={`flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium border transition-colors whitespace-nowrap ${
+                        m.is_child
+                          ? 'bg-amber-50 border-amber-200 text-amber-700'
+                          : 'bg-blue-50 border-blue-200 text-blue-700'
+                      }`}
+                    >
+                      {m.is_child ? '👶 Bimbo/a' : '👨 Adulto'}
+                    </button>
+                    {newMembers.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeMemberRow(i)}
+                        className="text-red-300 hover:text-red-500 transition-colors text-lg leading-none px-1"
+                      >
+                        ×
+                      </button>
+                    )}
+                  </div>
+                ))}
               </div>
-              {/* Submit */}
+
               <button
-                type="submit"
-                disabled={addingGuest || !newName.trim()}
-                className="bg-gold text-white px-6 py-2.5 rounded-lg text-sm hover:bg-gold/90 transition-colors disabled:opacity-60 flex-shrink-0"
+                type="button"
+                onClick={addMemberRow}
+                className="mt-2 text-xs text-gold/70 hover:text-gold transition-colors flex items-center gap-1"
               >
-                {addingGuest ? '…' : 'Aggiungi'}
+                <span className="text-base leading-none">+</span> Aggiungi componente
               </button>
             </div>
 
-            {/* Anteprima slug */}
-            {newName.trim() && !newGuestSlug && (
-              <p className="text-xs text-charcoal/40 mt-2">
-                Slug: <span className="font-mono text-gold/70">{slugify(newName.trim())}</span>
-                {newMaxGuests > 1 && (
-                  <span className="ml-2 text-charcoal/40">· invito per {newMaxGuests} persone</span>
-                )}
-              </p>
-            )}
+            <div className="flex justify-end">
+              <button
+                type="submit"
+                disabled={addingGuest || !newName.trim()}
+                className="bg-gold text-white px-6 py-2.5 rounded-lg text-sm hover:bg-gold/90 transition-colors disabled:opacity-60"
+              >
+                {addingGuest ? '…' : 'Aggiungi invito'}
+              </button>
+            </div>
           </form>
 
-          {/* Link generato dopo aggiunta */}
           {newGuestSlug && (
             <LinkBox slug={newGuestSlug} onClose={() => setNewGuestSlug(null)} />
           )}
@@ -417,7 +569,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Tabella */}
+        {/* Tabella ospiti */}
         {loading ? (
           <div className="text-center py-12 text-charcoal/40">Caricamento…</div>
         ) : (
@@ -426,9 +578,9 @@ export default function DashboardPage() {
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-cream/60 border-b border-gold/10">
-                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Nome</th>
+                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Nome gruppo</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60">Link invito</th>
-                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Persone</th>
+                    <th className="text-left px-4 py-3 font-medium text-charcoal/60">Componenti</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60">RSVP</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60 hidden sm:table-cell">Allergie</th>
                     <th className="text-left px-4 py-3 font-medium text-charcoal/60 hidden md:table-cell">Messaggio</th>
@@ -450,20 +602,16 @@ export default function DashboardPage() {
                         <td className="px-4 py-3">
                           <GuestLinkCell slug={g.slug} />
                         </td>
-                        <td className="px-4 py-3 text-center">
-                          <span className="inline-flex items-center gap-1 text-charcoal/70 text-xs">
-                            👥 {g.max_guests}
-                          </span>
+                        <td className="px-4 py-3">
+                          <MembersCell members={g.guest_members} />
                         </td>
                         <td className="px-4 py-3">
-                          <span className={`inline-block border text-xs px-2 py-0.5 rounded-full ${STATUS_LABELS[g.rsvp_status]?.color}`}>
-                            {STATUS_LABELS[g.rsvp_status]?.label}
-                          </span>
+                          <RsvpCell guest={g} />
                         </td>
-                        <td className="px-4 py-3 text-charcoal/60 hidden sm:table-cell max-w-[140px] truncate">
-                          {g.allergies || '—'}
+                        <td className="px-4 py-3 hidden sm:table-cell max-w-[160px]">
+                          <AllergiesCell members={g.guest_members} />
                         </td>
-                        <td className="px-4 py-3 text-charcoal/60 hidden md:table-cell max-w-[180px] truncate">
+                        <td className="px-4 py-3 text-charcoal/60 hidden md:table-cell max-w-[180px] truncate text-xs">
                           {g.message || '—'}
                         </td>
                         <td className="px-4 py-3 text-charcoal/50 text-xs hidden lg:table-cell whitespace-nowrap">
@@ -492,37 +640,6 @@ export default function DashboardPage() {
           </div>
         )}
       </div>
-    </div>
-  )
-}
-
-// Cella link con copia inline
-function GuestLinkCell({ slug }) {
-  const [copied, setCopied] = useState(false)
-  const url = typeof window !== 'undefined'
-    ? `${window.location.origin}/invite/${slug}`
-    : `/invite/${slug}`
-
-  const handleCopy = () => {
-    navigator.clipboard.writeText(url)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
-  }
-
-  return (
-    <div className="flex items-center gap-1.5 max-w-[200px]">
-      <code className="text-xs text-gold/70 truncate">/invite/{slug}</code>
-      <button
-        onClick={handleCopy}
-        className={`flex-shrink-0 text-xs px-2 py-0.5 rounded transition-colors ${
-          copied
-            ? 'text-green-600 bg-green-50'
-            : 'text-charcoal/40 hover:text-gold hover:bg-gold/5'
-        }`}
-        title="Copia link"
-      >
-        {copied ? '✓' : '⎘'}
-      </button>
     </div>
   )
 }

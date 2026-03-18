@@ -142,13 +142,25 @@ export default function WeddingCard({ guestName }) {
           {WEDDING.groomName}
         </h1>
 
+        <div style={{
+          fontFamily: "'Allura', cursive",
+          fontSize: 'clamp(1.6rem, 5.5vw, 2.6rem)',
+          color: '#0A0A0A',
+          opacity: 0.40,
+          lineHeight: 1,
+          textAlign: 'center',
+          marginTop: '-0.15rem',
+        }}>
+          {'&'}
+        </div>
+
         <h1 style={{
           fontFamily: "'Allura', cursive",
           fontSize: 'clamp(4.8rem, 18vw, 9rem)',
           fontWeight: 400, lineHeight: 1.05,
           color: '#0A0A0A',
           textShadow: '0 1px 8px rgba(255,255,255,0.20)',
-          marginTop: '-0.5rem', display: 'block',
+          marginTop: '-0.15rem', display: 'block',
           transform: 'translateX(10%)',
         }}>
           {WEDDING.brideName}

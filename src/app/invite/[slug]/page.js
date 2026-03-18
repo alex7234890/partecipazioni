@@ -26,7 +26,7 @@ export default function InvitePage() {
       const supabase = createClient()
       const { data, error } = await supabase
         .from('guests')
-        .select('*')
+        .select('*, guest_members(*)')
         .eq('slug', slug)
         .single()
       if (error || !data) setNotFound(true)
@@ -89,7 +89,7 @@ export default function InvitePage() {
       <Divider />
       <GiftList />
       <Divider />
-      <RSVPForm guest={guest} />
+      <RSVPForm guest={guest} members={guest?.guest_members || []} />
 
       {/* Footer */}
       <footer style={{ padding: '48px 0 40px', textAlign: 'center', borderTop: '1px solid rgba(139,150,64,0.1)' }}>
