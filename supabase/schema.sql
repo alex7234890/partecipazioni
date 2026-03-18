@@ -55,6 +55,37 @@ create policy "guest_update_own"
   with check (true);
 
 -- ============================================================
+-- Tabella componenti dell'invito (guest_members)
+-- Ogni riga = una persona fisica nell'invito (adulto o bambino)
+-- ============================================================
+
+create table if not exists public.guest_members (
+  id          uuid primary key default gen_random_uuid(),
+  guest_id    uuid not null references public.guests(id) on delete cascade,
+  name        text not null,
+  is_child    boolean not null default false,
+  rsvp_status text not null default 'pending' check (rsvp_status in ('yes', 'no', 'pending')),
+  allergies   text,
+  created_at  timestamptz not null default now()
+);
+
+create index if not exists idx_guest_members_guest_id on public.guest_members(guest_id);
+
+alter table public.guest_members enable row level security;
+
+create policy "sposi_full_access_members"
+  on public.guest_members for all to authenticated
+  using (true) with check (true);
+
+create policy "guest_read_members"
+  on public.guest_members for select to anon
+  using (true);
+
+create policy "guest_update_members"
+  on public.guest_members for update to anon
+  using (true) with check (true);
+
+-- ============================================================
 -- Dati di esempio (rimuovi o commenta in produzione)
 -- ============================================================
 
