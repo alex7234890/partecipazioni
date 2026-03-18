@@ -42,6 +42,15 @@ body {
   color: #8B9640;
 }
 
+/* Nasconde il pulsante play nativo su iOS/webkit */
+video::-webkit-media-controls,
+video::-webkit-media-controls-overlay-play-button,
+video::-webkit-media-controls-start-playback-button,
+video::-webkit-media-controls-play-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
+
 /* Scrollbar sottile */
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #FAF7F2; }
